@@ -11,485 +11,146 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1400'/%3E%3Ccircle cx='256' cy='200' r='90' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='42' fill='%231a1400'/%3E%3Cellipse cx='256' cy='200' rx='90' ry='90' fill='none' stroke='%23f59e0b' stroke-width='12'/%3E%3Cpath d='M256 280 C256 280 176 360 176 420 Q176 460 256 460 Q336 460 336 420 Q336 360 256 280Z' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='30' fill='%23fbbf24'/%3E%3C/svg%3E">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1400'/%3E%3Ccircle cx='256' cy='200' r='90' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='42' fill='%231a1400'/%3E%3Cpath d='M256 280 C256 280 176 360 176 420 Q176 460 256 460 Q336 460 336 420 Q336 360 256 280Z' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='30' fill='%23fbbf24'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   :root {
-    --bg: #110e00;
-    --surface: #1c1800;
-    --surface2: #252000;
-    --border: rgba(251,191,36,0.18);
-    --accent: #fbbf24;
-    --accent2: #f59e0b;
-    --green: #34d399;
-    --red: #f87171;
-    --amber: #fbbf24;
-    --wa: #25D366;
-    --text: #fef9e7;
-    --muted: #a08c3a;
-    --radius: 16px;
+    --bg:#110e00; --surface:#1c1800; --surface2:#252000;
+    --border:rgba(251,191,36,0.18); --accent:#fbbf24; --accent2:#f59e0b;
+    --green:#34d399; --red:#f87171; --amber:#fbbf24; --wa:#25D366;
+    --text:#fef9e7; --muted:#a08c3a; --radius:16px;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: calc(80px + env(safe-area-inset-bottom));
-  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:calc(80px + env(safe-area-inset-bottom));}
 
   /* Header */
-  .header {
-    background: linear-gradient(135deg, #1c1800 0%, #110e00 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 20px 16px;
-    padding-top: calc(20px + env(safe-area-inset-top));
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(20px);
-  }
-
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-  }
-
-  .logo-words {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-  }
-
-  .logo-by {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.5px;
-    font-weight: 500;
-    opacity: 0.8;
-  }
-
-  .logo-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 2px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .count-badge {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  .count-badge span { color: var(--accent); font-weight: 600; }
+  .header{background:linear-gradient(135deg,#1c1800 0%,#110e00 100%);border-bottom:1px solid var(--border);padding:20px 20px 16px;padding-top:calc(20px + env(safe-area-inset-top));position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
+  .header-top{display:flex;align-items:center;justify-content:space-between;}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .logo-words{display:flex;flex-direction:column;gap:1px;}
+  .logo-text{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .logo-by{font-size:10px;color:var(--muted);letter-spacing:.5px;font-weight:500;opacity:.8;}
+  .count-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:13px;color:var(--muted);}
+  .count-badge span{color:var(--accent);font-weight:600;}
 
   /* Tabs */
-  .tabs {
-    display: flex;
-    gap: 6px;
-    margin-top: 14px;
-  }
-
-  .tab {
-    flex: 1;
-    padding: 8px;
-    border: none;
-    border-radius: 10px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: var(--surface2);
-    color: var(--muted);
-  }
-
-  .tab.active {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    color: #1a1400;
-  }
+  .tabs{display:flex;gap:5px;margin-top:14px;}
+  .tab{flex:1;padding:7px 2px;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;background:var(--surface2);color:var(--muted);line-height:1.4;}
+  .tab.active{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1400;}
 
   /* Views */
-  .view { display: none; padding: 20px; }
-  .view.active { display: block; }
+  .view{display:none;padding:20px;}
+  .view.active{display:block;}
 
-  /* Add Form */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 16px;
-  }
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+  .card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
 
-  .card-title {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 14px;
-  }
+  /* Form */
+  .form-group{margin-bottom:14px;}
+  .form-label{font-size:13px;color:var(--muted);margin-bottom:6px;display:block;}
+  .form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none;}
+  .form-input:focus{border-color:var(--accent);}
+  .form-input::placeholder{color:var(--muted);}
+  textarea.form-input{resize:none;height:80px;}
 
-  .form-group { margin-bottom: 14px; }
+  /* GPS btn */
+  .gps-btn{width:100%;padding:14px;border:2px dashed var(--border);border-radius:12px;background:transparent;color:var(--accent);font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+  .gps-btn:hover{background:rgba(251,191,36,.06);border-color:var(--accent);}
+  .gps-btn.got{border-style:solid;border-color:var(--green);color:var(--green);}
+  .gps-btn.loading{border-color:var(--amber);color:var(--amber);}
+  .gps-coords{font-size:11px;color:var(--muted);text-align:center;margin-top:6px;font-family:monospace;line-height:1.5;}
 
-  .form-label {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 6px;
-    display: block;
-  }
+  /* Photo upload */
+  .photo-upload{width:100%;height:140px;border:2px dashed var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all .2s;overflow:hidden;position:relative;background:var(--surface2);}
+  .photo-upload:hover{border-color:var(--accent2);}
+  .photo-upload img{position:absolute;width:100%;height:100%;object-fit:cover;}
+  .photo-upload .overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;opacity:0;transition:opacity .2s;}
+  .photo-upload:hover .overlay{opacity:1;}
+  .photo-upload .upload-icon{font-size:32px;}
+  .photo-upload .upload-text{font-size:13px;color:var(--muted);}
+  .photo-upload input{display:none;}
 
-  .form-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 16px;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-  }
+  /* Save btn */
+  .save-btn{width:100%;padding:16px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;border-radius:12px;color:#1a1400;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .save-btn:active{transform:scale(.98);opacity:.9;}
 
-  .form-input:focus { border-color: var(--accent); }
-  .form-input::placeholder { color: var(--muted); }
+  /* WhatsApp badge + tip */
+  .wa-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,.12);color:var(--wa);border:1px solid rgba(37,211,102,.25);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;margin-bottom:12px;}
+  .tip-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px;}
+  .tip-box b{color:var(--text);}
 
-  textarea.form-input {
-    resize: none;
-    height: 80px;
-  }
+  /* Saved */
+  .search-bar{position:relative;margin-bottom:16px;}
+  .search-bar input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px 12px 40px;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--text);outline:none;-webkit-appearance:none;}
+  .search-bar input:focus{border-color:var(--accent);}
+  .search-bar input::placeholder{color:var(--muted);}
+  .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;}
+  .location-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;animation:slideIn .3s ease;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .loc-photo{width:100%;height:160px;object-fit:cover;display:block;}
+  .loc-no-photo{width:100%;height:80px;background:linear-gradient(135deg,#252000,#1c1800);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--muted);}
+  .loc-body{padding:14px;}
+  .loc-name{font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .loc-name-text{flex:1;}
+  .loc-note{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.4;}
+  .loc-coords{font-size:11px;color:var(--muted);font-family:monospace;margin-bottom:12px;}
+  .loc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+  .loc-actions-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .action-btn{padding:10px 6px;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s;}
+  .action-btn:active{transform:scale(.95);}
+  .btn-maps{background:rgba(251,191,36,.12);color:var(--accent);border:1px solid rgba(251,191,36,.25);}
+  .btn-wa{background:rgba(37,211,102,.12);color:var(--wa);border:1px solid rgba(37,211,102,.2);}
+  .btn-pin{background:rgba(129,140,248,.12);color:#818cf8;border:1px solid rgba(129,140,248,.2);}
+  .btn-delete{background:rgba(248,113,113,.10);color:var(--red);border:1px solid rgba(248,113,113,.15);}
+  .btn-icon{font-size:18px;}
+  .date-badge{font-size:11px;color:var(--muted);background:var(--surface2);padding:3px 8px;border-radius:6px;white-space:nowrap;}
 
-  /* GPS Button */
-  .gps-btn {
-    width: 100%;
-    padding: 14px;
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--accent);
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s;
-  }
+  /* Empty */
+  .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+  .empty-state .empty-icon{font-size:56px;margin-bottom:16px;}
+  .empty-state h3{font-size:18px;color:var(--text);margin-bottom:8px;}
+  .empty-state p{font-size:14px;line-height:1.5;}
 
-  .gps-btn:hover { background: rgba(56,189,248,0.08); border-color: var(--accent); }
-  .gps-btn.got { border-style: solid; border-color: var(--green); color: var(--green); }
-  .gps-btn.loading { border-color: var(--amber); color: var(--amber); }
-
-  .gps-coords {
-    font-size: 11px;
-    color: var(--muted);
-    text-align: center;
-    margin-top: 6px;
-    font-family: monospace;
-  }
-
-  /* Photo Upload */
-  .photo-upload {
-    width: 100%;
-    height: 140px;
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    overflow: hidden;
-    position: relative;
-    background: var(--surface2);
-  }
-
-  .photo-upload:hover { border-color: var(--accent2); }
-  .photo-upload img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
-  .photo-upload .overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .photo-upload:hover .overlay { opacity: 1; }
-  .photo-upload .upload-icon { font-size: 32px; }
-  .photo-upload .upload-text { font-size: 13px; color: var(--muted); }
-  .photo-upload input { display: none; }
-
-  /* Save Button */
-  .save-btn {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    border: none;
-    border-radius: 12px;
-    color: #1a1400;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .save-btn:active { transform: scale(0.98); opacity: 0.9; }
-  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  /* Saved Locations List */
-  .search-bar {
-    position: relative;
-    margin-bottom: 16px;
-  }
-
-  .search-bar input {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 14px 12px 40px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 16px;
-    color: var(--text);
-    outline: none;
-    -webkit-appearance: none;
-  }
-
-  .search-bar input:focus { border-color: var(--accent); }
-  .search-bar input::placeholder { color: var(--muted); }
-
-  .search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    font-size: 16px;
-  }
-
-  .location-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-bottom: 12px;
-    overflow: hidden;
-    animation: slideIn 0.3s ease;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .loc-photo {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-    display: block;
-  }
-
-  .loc-no-photo {
-    width: 100%;
-    height: 80px;
-    background: linear-gradient(135deg, #252000, #1c1800);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    color: var(--muted);
-  }
-
-  .loc-body { padding: 14px; }
-
-  .loc-name {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 4px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  .loc-name-text { flex: 1; }
-
-  .loc-note {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 10px;
-    line-height: 1.4;
-  }
-
-  .loc-coords {
-    font-size: 11px;
-    color: var(--muted);
-    font-family: monospace;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .loc-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-  }
-
-  .action-btn {
-    padding: 10px 6px;
-    border: none;
-    border-radius: 10px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.2s;
-  }
-
-  .action-btn:active { transform: scale(0.95); }
-
-  .btn-maps {
-    background: rgba(251,191,36,0.12);
-    color: var(--accent);
-    border: 1px solid rgba(251,191,36,0.25);
-  }
-
-  .btn-wa {
-    background: rgba(37,211,102,0.12);
-    color: var(--wa);
-    border: 1px solid rgba(37,211,102,0.2);
-  }
-
-  .btn-delete {
-    background: rgba(248,113,113,0.1);
-    color: var(--red);
-    border: 1px solid rgba(248,113,113,0.15);
-  }
-
-  .action-btn .btn-icon { font-size: 18px; }
-
-  /* Empty State */
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-  }
-
-  .empty-state .empty-icon { font-size: 56px; margin-bottom: 16px; }
-  .empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
-  .empty-state p { font-size: 14px; line-height: 1.5; }
+  /* Map Modal */
+  .map-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.9);backdrop-filter:blur(8px);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .map-modal.open{opacity:1;pointer-events:all;}
+  .map-header{background:linear-gradient(135deg,#1c1800,#110e00);border-bottom:1px solid var(--border);padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .map-title{font-size:16px;font-weight:700;color:var(--text);}
+  .map-subtitle{font-size:11px;color:var(--muted);margin-top:2px;}
+  .map-close{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  #mapContainer{flex:1;position:relative;min-height:0;}
+  #leafletMap{width:100%;height:100%;}
+  .map-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);font-size:40px;pointer-events:none;z-index:1000;filter:drop-shadow(0 3px 8px rgba(0,0,0,.8));animation:pinBounce .7s ease infinite alternate;}
+  @keyframes pinBounce{from{transform:translate(-50%,-100%)}to{transform:translate(-50%,-115%)}}
+  .map-shadow{position:absolute;top:50%;left:50%;transform:translate(-50%,2px);width:16px;height:6px;background:rgba(0,0,0,.35);border-radius:50%;pointer-events:none;z-index:999;filter:blur(2px);}
+  .map-info-bar{background:linear-gradient(135deg,#1c1800,#110e00);border-top:1px solid var(--border);padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom));flex-shrink:0;}
+  .map-coords-live{font-family:monospace;font-size:14px;color:var(--accent);margin-bottom:6px;text-align:center;font-weight:600;}
+  .map-hint{font-size:12px;color:var(--muted);text-align:center;margin-bottom:12px;}
+  .map-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .map-btn-cancel{padding:13px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
+  .map-btn-save{padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1400;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
 
   /* Toast */
-  .toast {
-    position: fixed;
-    bottom: calc(90px + env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    z-index: 999;
-    opacity: 0;
-    transition: all 0.3s;
-    white-space: nowrap;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* Date badge */
-  .date-badge {
-    font-size: 11px;
-    color: var(--muted);
-    background: var(--surface2);
-    padding: 3px 8px;
-    border-radius: 6px;
-    white-space: nowrap;
-  }
+  .toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--text);z-index:999;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* Spinner */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(251,191,36,0.3);
-    border-top-color: #fbbf24;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    display: inline-block;
-  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{width:16px;height:16px;border:2px solid rgba(251,191,36,.3);border-top-color:#fbbf24;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
 
-  /* Credits */
-  .credit {
-    text-align: center;
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-    text-transform: uppercase;
-    padding: 20px 0 8px;
-    opacity: 0.5;
-  }
+  /* Credit */
+  .credit{text-align:center;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;padding:20px 0 8px;opacity:.5;}
+
+  /* Leaflet */
+  .leaflet-control-attribution{display:none!important;}
+  .leaflet-container{background:#1c1800;}
 </style>
 </head>
 <body>
 
+<!-- ═══ HEADER ═══ -->
 <div class="header">
   <div class="header-top">
     <div class="logo">
@@ -502,265 +163,448 @@
     <div class="count-badge"><span id="locCount">0</span> saved</div>
   </div>
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('add')">➕ Add Location</button>
-    <button class="tab" onclick="switchTab('saved')">🗂️ Saved Places</button>
+    <button class="tab active" onclick="switchTab('add')">📡 GPS</button>
+    <button class="tab"        onclick="switchTab('paste')">🔗 Link</button>
+    <button class="tab"        onclick="switchTab('wa')">💬 WhatsApp</button>
+    <button class="tab"        onclick="switchTab('saved')">🗂️ Saved</button>
   </div>
 </div>
 
-<!-- ADD LOCATION VIEW -->
+<!-- ═══ TAB 1 — GPS ═══ -->
 <div id="view-add" class="view active">
-
   <div class="card">
     <div class="card-title">📌 Location Details</div>
-
     <div class="form-group">
       <label class="form-label">Place Name *</label>
       <input type="text" class="form-input" id="placeName" placeholder="e.g. Altius Office, Home, Client Site..." maxlength="80">
     </div>
-
     <div class="form-group">
       <label class="form-label">Notes (optional)</label>
-      <textarea class="form-input" id="placeNote" placeholder="Directions, floor number, landmark info..."></textarea>
+      <textarea class="form-input" id="placeNote" placeholder="Directions, floor number, landmark..."></textarea>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title">🌐 GPS Coordinates</div>
-
     <button class="gps-btn" id="gpsBtn" onclick="getLocation()">
-      <span id="gpsBtnIcon">📡</span>
-      <span id="gpsBtnText">Tap to Get Current Location</span>
+      <span id="gpsBtnIcon">📡</span><span id="gpsBtnText">Tap to Get Current Location</span>
     </button>
     <div class="gps-coords" id="gpsCoords"></div>
   </div>
-
   <div class="card">
     <div class="card-title">📷 Place Photo</div>
     <div class="photo-upload" id="photoUpload" onclick="document.getElementById('photoInput').click()">
       <div class="upload-icon">🖼️</div>
       <div class="upload-text">Tap to attach photo</div>
-      <div class="overlay">
-        <span style="font-size:22px">✏️</span>
-        <span style="font-size:12px;color:#fff">Change Photo</span>
-      </div>
-      <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
+      <div class="overlay"><span style="font-size:22px">✏️</span><span style="font-size:12px;color:#fff">Change Photo</span></div>
+      <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event,'photoUpload')">
     </div>
   </div>
-
-  <button class="save-btn" id="saveBtn" onclick="saveLocation()">
-    <span>💾</span> Save Location
-  </button>
-
+  <button class="save-btn" onclick="saveLocation()"><span>💾</span> Save Location</button>
   <div class="credit">HARISH CHURATHIL</div>
 </div>
 
-<!-- SAVED PLACES VIEW -->
+<!-- ═══ TAB 2 — PASTE LINK / COORDS ═══ -->
+<div id="view-paste" class="view">
+  <div class="card">
+    <div class="card-title">🔗 Paste Map Link or Coordinates</div>
+    <div class="form-group">
+      <label class="form-label">Google Maps Link or Coordinates</label>
+      <textarea class="form-input" id="pasteInput" style="height:110px;" placeholder="Paste any of these:&#10;• google.com/maps/place/@25.20,55.27...&#10;• Coordinates: 25.204849, 55.270782&#10;• Short link: maps.app.goo.gl/..."></textarea>
+    </div>
+    <button class="gps-btn" onclick="parseInput()" style="border-style:solid;border-color:var(--accent);margin-bottom:8px;">
+      <span>🔍</span><span>Extract Coordinates</span>
+    </button>
+    <div id="parseResult" class="gps-coords" style="min-height:18px;"></div>
+  </div>
+  <div class="card" id="pasteDetailsCard" style="display:none;">
+    <div class="card-title">📌 Location Details</div>
+    <div class="form-group">
+      <label class="form-label">Place Name *</label>
+      <input type="text" class="form-input" id="pasteName" placeholder="e.g. Client Office, Site..." maxlength="80">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea class="form-input" id="pasteNote" placeholder="Directions, floor, landmark..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📷 Attach Photo (optional)</label>
+      <div class="photo-upload" id="pastePhotoUpload" onclick="document.getElementById('pastePhotoInput').click()">
+        <div class="upload-icon">🖼️</div><div class="upload-text">Tap to attach photo</div>
+        <div class="overlay"><span style="font-size:22px">✏️</span><span style="font-size:12px;color:#fff">Change Photo</span></div>
+        <input type="file" id="pastePhotoInput" accept="image/*" onchange="handlePhoto(event,'pastePhotoUpload')">
+      </div>
+    </div>
+    <button class="save-btn" onclick="savePastedLocation()"><span>💾</span> Save Location</button>
+  </div>
+  <div class="credit">HARISH CHURATHIL</div>
+</div>
+
+<!-- ═══ TAB 3 — WHATSAPP IMPORT ═══ -->
+<div id="view-wa" class="view">
+  <div class="card">
+    <div class="wa-badge">💬 WhatsApp Location Import</div>
+    <div class="tip-box">
+      <b>How to save a WhatsApp location:</b><br>
+      1️⃣ Open the location message in WhatsApp<br>
+      2️⃣ Tap &amp; hold the message → tap <b>Copy</b><br>
+      3️⃣ Paste below and tap <b>Extract</b><br><br>
+      <b>Also works by copying the link from WhatsApp:</b><br>
+      Tap the location → tap <b>Open in Maps</b> → copy the URL from browser → paste here
+    </div>
+    <div class="form-group">
+      <label class="form-label">Paste WhatsApp Message or Location Link</label>
+      <textarea class="form-input" id="waInput" style="height:130px;" placeholder="Paste the WhatsApp location message here...&#10;&#10;Example of what WhatsApp copies:&#10;Location&#10;https://maps.google.com/?q=25.2048,55.2708&#10;&#10;Or just paste any maps link directly"></textarea>
+    </div>
+    <button class="gps-btn" onclick="parseWA()" style="border-style:solid;border-color:rgba(37,211,102,.6);color:var(--wa);margin-bottom:8px;">
+      <span>📥</span><span>Extract from WhatsApp</span>
+    </button>
+    <div id="waResult" class="gps-coords" style="min-height:18px;"></div>
+  </div>
+  <div class="card" id="waDetailsCard" style="display:none;">
+    <div class="card-title">📌 Location Details</div>
+    <div class="form-group">
+      <label class="form-label">Place Name *</label>
+      <input type="text" class="form-input" id="waName" placeholder="e.g. Customer Location, Delivery Point..." maxlength="80">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea class="form-input" id="waNote" placeholder="Who sent it, what it's for..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📷 Attach Photo (optional)</label>
+      <div class="photo-upload" id="waPhotoUpload" onclick="document.getElementById('waPhotoInput').click()">
+        <div class="upload-icon">🖼️</div><div class="upload-text">Tap to attach photo</div>
+        <div class="overlay"><span style="font-size:22px">✏️</span><span style="font-size:12px;color:#fff">Change Photo</span></div>
+        <input type="file" id="waPhotoInput" accept="image/*" onchange="handlePhoto(event,'waPhotoUpload')">
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveWALocation()"><span>💾</span> Save Location</button>
+  </div>
+  <div class="credit">HARISH CHURATHIL</div>
+</div>
+
+<!-- ═══ TAB 4 — SAVED ═══ -->
 <div id="view-saved" class="view">
   <div class="search-bar">
     <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Search saved places..." oninput="renderSaved()" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px 12px 40px;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--text);outline:none;width:100%;" />
+    <input type="text" id="searchInput" placeholder="Search saved places..." oninput="renderSaved()">
   </div>
-
   <div id="savedList"></div>
   <div class="credit">HARISH CHURATHIL</div>
+</div>
+
+<!-- ═══ MAP MODAL — ADJUST PIN ═══ -->
+<div class="map-modal" id="mapModal">
+  <div class="map-header">
+    <div>
+      <div class="map-title" id="mapModalTitle">Adjust Pin</div>
+      <div class="map-subtitle">Pan the map to move the 📍 pin to the exact spot</div>
+    </div>
+    <button class="map-close" onclick="closeMap()">✕</button>
+  </div>
+  <div id="mapContainer">
+    <div id="leafletMap"></div>
+    <div class="map-shadow"></div>
+    <div class="map-crosshair">📍</div>
+  </div>
+  <div class="map-info-bar">
+    <div class="map-coords-live" id="mapCoordsLive">— , —</div>
+    <div class="map-hint">Pan &amp; zoom until the pin is exactly on your location, then tap Save</div>
+    <div class="map-actions">
+      <button class="map-btn-cancel" onclick="closeMap()">Cancel</button>
+      <button class="map-btn-save"   onclick="saveAdjustedPin()">✅ Save Position</button>
+    </div>
+  </div>
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-  let locations = JSON.parse(localStorage.getItem('locationvault') || '[]');
-  let currentLat = null, currentLng = null;
-  let photoData = null;
+/* ════════════════════ STATE ════════════════════ */
+let locations   = JSON.parse(localStorage.getItem('locationvault') || '[]');
+let currentLat  = null, currentLng  = null;
+let parsedLat   = null, parsedLng   = null;
+let waParsedLat = null, waParsedLng = null;
+let photoDataMap= {photoUpload:null,pastePhotoUpload:null,waPhotoUpload:null};
+let mapInstance = null, mapEditId = null;
 
-  function switchTab(tab) {
-    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='add')||(i===1&&tab==='saved')));
-    document.getElementById('view-add').classList.toggle('active', tab==='add');
-    document.getElementById('view-saved').classList.toggle('active', tab==='saved');
-    if (tab === 'saved') renderSaved();
-  }
+/* ════════════════════ TABS ════════════════════ */
+function switchTab(tab){
+  const keys=['add','paste','wa','saved'];
+  const ids =['view-add','view-paste','view-wa','view-saved'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',keys[i]===tab));
+  ids.forEach((v,i)=>document.getElementById(v).classList.toggle('active',keys[i]===tab));
+  if(tab==='saved') renderSaved();
+}
 
-  function getLocation() {
-    const btn = document.getElementById('gpsBtn');
-    const icon = document.getElementById('gpsBtnIcon');
-    const text = document.getElementById('gpsBtnText');
-    const coords = document.getElementById('gpsCoords');
+/* ════════════════════ GPS ════════════════════ */
+function getLocation(){
+  const btn=document.getElementById('gpsBtn');
+  const icon=document.getElementById('gpsBtnIcon');
+  const text=document.getElementById('gpsBtnText');
+  const coord=document.getElementById('gpsCoords');
+  btn.className='gps-btn loading';
+  icon.innerHTML='<div class="spinner"></div>';
+  text.textContent='Getting location...';
+  if(!navigator.geolocation){showToast('❌ Geolocation not supported');resetGps();return;}
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      currentLat=pos.coords.latitude.toFixed(6);
+      currentLng=pos.coords.longitude.toFixed(6);
+      btn.className='gps-btn got';icon.textContent='✅';text.textContent='Location Captured!';
+      coord.textContent=`${currentLat}, ${currentLng}`;
+      showToast('✅ Location captured!');
+    },
+    err=>{resetGps();coord.textContent='';showToast(err.code===1?'❌ Permission denied':'❌ Could not get location');},
+    {enableHighAccuracy:true,timeout:15000}
+  );
+}
+function resetGps(){
+  document.getElementById('gpsBtn').className='gps-btn';
+  document.getElementById('gpsBtnIcon').textContent='📡';
+  document.getElementById('gpsBtnText').textContent='Tap to Get Current Location';
+}
+function saveLocation(){
+  const name=document.getElementById('placeName').value.trim();
+  if(!name){showToast('⚠️ Please enter a place name');return;}
+  if(!currentLat||!currentLng){showToast('⚠️ Please capture GPS location first');return;}
+  doSave({name,note:document.getElementById('placeNote').value.trim(),lat:currentLat,lng:currentLng,photo:photoDataMap.photoUpload});
+  document.getElementById('placeName').value='';
+  document.getElementById('placeNote').value='';
+  document.getElementById('gpsCoords').textContent='';
+  resetGps(); currentLat=null;currentLng=null;
+  clearPhoto('photoUpload');
+}
 
-    btn.className = 'gps-btn loading';
-    icon.innerHTML = '<div class="spinner"></div>';
-    text.textContent = 'Getting location...';
+/* ════════════════════ PHOTO ════════════════════ */
+function handlePhoto(e,wrapId){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    photoDataMap[wrapId]=ev.target.result;
+    const wrap=document.getElementById(wrapId);
+    let img=wrap.querySelector('img');
+    if(!img){img=document.createElement('img');wrap.prepend(img);
+      wrap.querySelector('.upload-icon').style.display='none';
+      wrap.querySelector('.upload-text').style.display='none';}
+    img.src=ev.target.result;showToast('📷 Photo attached!');
+  };
+  reader.readAsDataURL(file);
+}
+function clearPhoto(wrapId){
+  photoDataMap[wrapId]=null;
+  const wrap=document.getElementById(wrapId);
+  const img=wrap.querySelector('img');if(img)img.remove();
+  wrap.querySelector('.upload-icon').style.display='';
+  wrap.querySelector('.upload-text').style.display='';
+}
 
-    if (!navigator.geolocation) {
-      showToast('❌ Geolocation not supported');
-      btn.className = 'gps-btn';
-      icon.textContent = '📡';
-      text.textContent = 'Tap to Get Current Location';
-      return;
-    }
+/* ════════════════════ COORD EXTRACTOR ════════════════════ */
+function extractCoords(raw){
+  let m;
+  // @lat,lng  (Google Maps URL style)
+  m=raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  // ?q=lat,lng
+  m=raw.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  // ll=lat,lng
+  m=raw.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  // destination=lat,lng
+  m=raw.match(/destination=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  // center=lat,lng
+  m=raw.match(/center=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  // plain "lat, lng" anywhere
+  m=raw.match(/(-?\d{1,3}\.\d{4,})[,\s]+(-?\d{1,3}\.\d{4,})/);
+  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  return null;
+}
+function isValid(lat,lng){return lat>=-90&&lat<=90&&lng>=-180&&lng<=180;}
 
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        currentLat = pos.coords.latitude.toFixed(6);
-        currentLng = pos.coords.longitude.toFixed(6);
-        btn.className = 'gps-btn got';
-        icon.textContent = '✅';
-        text.textContent = 'Location Captured!';
-        coords.textContent = `${currentLat}, ${currentLng}`;
-        showToast('✅ Location captured!');
-      },
-      err => {
-        btn.className = 'gps-btn';
-        icon.textContent = '📡';
-        text.textContent = 'Tap to Get Current Location';
-        coords.textContent = '';
-        if (err.code === 1) showToast('❌ Location permission denied');
-        else showToast('❌ Could not get location');
-      },
-      { enableHighAccuracy: true, timeout: 15000 }
+function tryShortLink(url,onSuccess,onFail){
+  fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
+    .then(r=>r.json()).then(d=>{
+      const c=extractCoords(d.contents||'');
+      if(c&&isValid(c[0],c[1]))onSuccess(c[0].toFixed(6),c[1].toFixed(6));
+      else onFail('extract');
+    }).catch(()=>onFail('network'));
+}
+
+/* ════════════════════ PASTE TAB ════════════════════ */
+function parseInput(){
+  const raw=document.getElementById('pasteInput').value.trim();
+  const el=document.getElementById('parseResult');
+  const card=document.getElementById('pasteDetailsCard');
+  if(!raw){showToast('⚠️ Please paste a link or coordinates');return;}
+  const c=extractCoords(raw);
+  if(c&&isValid(c[0],c[1])){
+    parsedLat=c[0].toFixed(6);parsedLng=c[1].toFixed(6);
+    el.innerHTML=`<span style="color:var(--green)">✅ Found: ${parsedLat}, ${parsedLng}</span>`;
+    card.style.display='block';showToast('✅ Coordinates extracted!');
+  } else if(raw.includes('goo.gl')||raw.includes('maps.app')){
+    el.innerHTML='<span style="color:var(--amber)">⏳ Resolving short link…</span>';
+    tryShortLink(raw,
+      (la,ln)=>{parsedLat=la;parsedLng=ln;el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;card.style.display='block';},
+      type=>el.innerHTML=`<span style="color:var(--red)">❌ ${type==='network'?'Link failed. Open in browser, copy full URL and paste here.':'Could not extract. Paste the full Google Maps URL.'}</span>`
     );
+  } else {
+    el.innerHTML='<span style="color:var(--red)">❌ No coordinates found. Try a full Google Maps URL.</span>';
+    card.style.display='none';
   }
+}
+function savePastedLocation(){
+  const name=document.getElementById('pasteName').value.trim();
+  if(!name){showToast('⚠️ Please enter a place name');return;}
+  if(!parsedLat||!parsedLng){showToast('⚠️ Extract coordinates first');return;}
+  doSave({name,note:document.getElementById('pasteNote').value.trim(),lat:parsedLat,lng:parsedLng,photo:photoDataMap.pastePhotoUpload});
+  document.getElementById('pasteInput').value='';document.getElementById('pasteName').value='';
+  document.getElementById('pasteNote').value='';document.getElementById('parseResult').innerHTML='';
+  document.getElementById('pasteDetailsCard').style.display='none';
+  parsedLat=null;parsedLng=null;clearPhoto('pastePhotoUpload');
+}
 
-  function handlePhoto(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      photoData = ev.target.result;
-      const wrap = document.getElementById('photoUpload');
-      let img = wrap.querySelector('img');
-      if (!img) {
-        img = document.createElement('img');
-        wrap.prepend(img);
-        wrap.querySelector('.upload-icon').style.display = 'none';
-        wrap.querySelector('.upload-text').style.display = 'none';
-      }
-      img.src = photoData;
-      showToast('📷 Photo attached!');
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function saveLocation() {
-    const name = document.getElementById('placeName').value.trim();
-    if (!name) { showToast('⚠️ Please enter a place name'); return; }
-    if (!currentLat || !currentLng) { showToast('⚠️ Please capture GPS location first'); return; }
-
-    const loc = {
-      id: Date.now(),
-      name,
-      note: document.getElementById('placeNote').value.trim(),
-      lat: currentLat,
-      lng: currentLng,
-      photo: photoData,
-      date: new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
-    };
-
-    locations.unshift(loc);
-    localStorage.setItem('locationvault', JSON.stringify(locations));
-    updateCount();
-
-    // Reset form
-    document.getElementById('placeName').value = '';
-    document.getElementById('placeNote').value = '';
-    document.getElementById('gpsCoords').textContent = '';
-    document.getElementById('gpsBtn').className = 'gps-btn';
-    document.getElementById('gpsBtnIcon').textContent = '📡';
-    document.getElementById('gpsBtnText').textContent = 'Tap to Get Current Location';
-    currentLat = null; currentLng = null;
-    photoData = null;
-    const wrap = document.getElementById('photoUpload');
-    const img = wrap.querySelector('img');
-    if (img) img.remove();
-    wrap.querySelector('.upload-icon').style.display = '';
-    wrap.querySelector('.upload-text').style.display = '';
-
-    showToast('✅ Location saved!');
-    setTimeout(() => switchTab('saved'), 800);
-  }
-
-  function renderSaved() {
-    const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
-    const list = document.getElementById('savedList');
-    const filtered = locations.filter(l =>
-      l.name.toLowerCase().includes(query) ||
-      (l.note && l.note.toLowerCase().includes(query))
-    );
-
-    if (filtered.length === 0) {
-      list.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🗺️</div>
-          <h3>${query ? 'No results found' : 'No Saved Places Yet'}</h3>
-          <p>${query ? 'Try a different search term' : 'Go to Add Location tab to save your first place!'}</p>
-        </div>`;
-      return;
+/* ════════════════════ WHATSAPP TAB ════════════════════ */
+function parseWA(){
+  const raw=document.getElementById('waInput').value.trim();
+  const el=document.getElementById('waResult');
+  const card=document.getElementById('waDetailsCard');
+  if(!raw){showToast('⚠️ Please paste the WhatsApp message');return;}
+  const c=extractCoords(raw);
+  if(c&&isValid(c[0],c[1])){
+    waParsedLat=c[0].toFixed(6);waParsedLng=c[1].toFixed(6);
+    el.innerHTML=`<span style="color:var(--green)">✅ Location found: ${waParsedLat}, ${waParsedLng}</span>`;
+    card.style.display='block';showToast('✅ WhatsApp location extracted!');
+  } else {
+    // Try to find any URL in the text and resolve it
+    const urlMatch=raw.match(/https?:\/\/[^\s]+/);
+    if(urlMatch){
+      el.innerHTML='<span style="color:var(--amber)">⏳ Resolving link…</span>';
+      tryShortLink(urlMatch[0],
+        (la,ln)=>{waParsedLat=la;waParsedLng=ln;el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;card.style.display='block';showToast('✅ Location extracted!');},
+        ()=>el.innerHTML='<span style="color:var(--red)">❌ Could not extract location. Try copying the full maps URL from your browser.</span>'
+      );
+    } else {
+      el.innerHTML='<span style="color:var(--red)">❌ No location found. Make sure you copied the full WhatsApp message with the link.</span>';
+      card.style.display='none';
     }
+  }
+}
+function saveWALocation(){
+  const name=document.getElementById('waName').value.trim();
+  if(!name){showToast('⚠️ Please enter a place name');return;}
+  if(!waParsedLat||!waParsedLng){showToast('⚠️ Extract location first');return;}
+  doSave({name,note:document.getElementById('waNote').value.trim(),lat:waParsedLat,lng:waParsedLng,photo:photoDataMap.waPhotoUpload});
+  document.getElementById('waInput').value='';document.getElementById('waName').value='';
+  document.getElementById('waNote').value='';document.getElementById('waResult').innerHTML='';
+  document.getElementById('waDetailsCard').style.display='none';
+  waParsedLat=null;waParsedLng=null;clearPhoto('waPhotoUpload');
+}
 
-    list.innerHTML = filtered.map(loc => `
-      <div class="location-card" id="card-${loc.id}">
-        ${loc.photo
-          ? `<img class="loc-photo" src="${loc.photo}" alt="${loc.name}">`
-          : `<div class="loc-no-photo">📍</div>`}
-        <div class="loc-body">
-          <div class="loc-name">
-            <span class="loc-name-text">${loc.name}</span>
-            <span class="date-badge">${loc.date}</span>
-          </div>
-          ${loc.note ? `<div class="loc-note">${loc.note}</div>` : ''}
-          <div class="loc-coords">📌 ${loc.lat}, ${loc.lng}</div>
-          <div class="loc-actions">
-            <button class="action-btn btn-maps" onclick="openMaps('${loc.lat}','${loc.lng}')">
-              <span class="btn-icon">🗺️</span>Google Maps
-            </button>
-            <button class="action-btn btn-wa" onclick="shareWhatsApp('${loc.name}','${loc.lat}','${loc.lng}','${(loc.note||'').replace(/'/g,"\\'")}')">
-              <span class="btn-icon">💬</span>WhatsApp
-            </button>
-            <button class="action-btn btn-delete" onclick="deleteLocation(${loc.id})">
-              <span class="btn-icon">🗑️</span>Delete
-            </button>
-          </div>
+/* ════════════════════ CORE SAVE ════════════════════ */
+function doSave({name,note,lat,lng,photo}){
+  const loc={
+    id:Date.now(),name,note:note||'',lat,lng,photo:photo||null,
+    date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+  };
+  locations.unshift(loc);
+  localStorage.setItem('locationvault',JSON.stringify(locations));
+  updateCount();showToast('✅ Location saved!');
+  setTimeout(()=>switchTab('saved'),800);
+}
+
+/* ════════════════════ SAVED LIST ════════════════════ */
+function renderSaved(){
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  const list=document.getElementById('savedList');
+  const filtered=locations.filter(l=>l.name.toLowerCase().includes(q)||(l.note&&l.note.toLowerCase().includes(q)));
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">🗺️</div><h3>${q?'No results':'No Saved Places Yet'}</h3><p>${q?'Try different keywords':'Use GPS, Link, or WhatsApp tab to save places!'}</p></div>`;
+    return;
+  }
+  list.innerHTML=filtered.map(loc=>`
+    <div class="location-card" id="card-${loc.id}">
+      ${loc.photo?`<img class="loc-photo" src="${loc.photo}" alt="${loc.name}">`:`<div class="loc-no-photo">📍</div>`}
+      <div class="loc-body">
+        <div class="loc-name"><span class="loc-name-text">${loc.name}</span><span class="date-badge">${loc.date}</span></div>
+        ${loc.note?`<div class="loc-note">${loc.note}</div>`:''}
+        <div class="loc-coords">📌 ${loc.lat}, ${loc.lng}</div>
+        <div class="loc-actions">
+          <button class="action-btn btn-maps" onclick="openMaps('${loc.lat}','${loc.lng}')"><span class="btn-icon">🗺️</span>Google Maps</button>
+          <button class="action-btn btn-wa"   onclick="shareWA('${loc.name}','${loc.lat}','${loc.lng}','${(loc.note||'').replace(/'/g,"\\'")}')"><span class="btn-icon">💬</span>WhatsApp</button>
+        </div>
+        <div class="loc-actions-2">
+          <button class="action-btn btn-pin"    onclick="openMapEditor(${loc.id})"><span class="btn-icon">🖐</span>Adjust Pin</button>
+          <button class="action-btn btn-delete" onclick="deleteLocation(${loc.id})"><span class="btn-icon">🗑️</span>Delete</button>
         </div>
       </div>
-    `).join('');
-  }
+    </div>`).join('');
+}
 
-  function openMaps(lat, lng) {
-    const url = `https://www.google.com/maps?q=${lat},${lng}`;
-    window.open(url, '_blank');
-  }
+/* ════════════════════ ACTIONS ════════════════════ */
+function openMaps(lat,lng){window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');}
+function shareWA(name,lat,lng,note){
+  const link=`https://www.google.com/maps?q=${lat},${lng}`;
+  let msg=`📍 *${name}*`;
+  if(note)msg+=`\n\n_${note}_`;
+  msg+=`\n\n🗺️ *Google Maps:*\n${link}\n\n📌 Coordinates: ${lat}, ${lng}\n\n_Shared via LocationVault_`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+function deleteLocation(id){
+  locations=locations.filter(l=>l.id!==id);
+  localStorage.setItem('locationvault',JSON.stringify(locations));
+  updateCount();renderSaved();showToast('🗑️ Location deleted');
+}
 
-  function shareWhatsApp(name, lat, lng, note) {
-    const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
-    let msg = `📍 *${name}*`;
-    if (note) msg += `\n\n_${note}_`;
-    msg += `\n\n🗺️ *Google Maps:*\n${mapsLink}`;
-    msg += `\n\n📌 Coordinates: ${lat}, ${lng}`;
-    msg += `\n\n_Shared via LocationVault_`;
-    const encoded = encodeURIComponent(msg);
-    window.open(`https://wa.me/?text=${encoded}`, '_blank');
-  }
+/* ════════════════════ MAP EDITOR ════════════════════ */
+function openMapEditor(id){
+  const loc=locations.find(l=>l.id===id);if(!loc)return;
+  mapEditId=id;
+  document.getElementById('mapModalTitle').textContent=loc.name;
+  document.getElementById('mapModal').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>{
+    if(mapInstance){mapInstance.remove();mapInstance=null;}
+    mapInstance=L.map('leafletMap',{
+      center:[parseFloat(loc.lat),parseFloat(loc.lng)],
+      zoom:18,zoomControl:true,attributionControl:false
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20}).addTo(mapInstance);
+    function updateLive(){
+      const c=mapInstance.getCenter();
+      document.getElementById('mapCoordsLive').textContent=`${c.lat.toFixed(6)},  ${c.lng.toFixed(6)}`;
+    }
+    mapInstance.on('move',updateLive);
+    mapInstance.on('moveend',updateLive);
+    updateLive();
+    setTimeout(()=>mapInstance.invalidateSize(),300);
+  },60);
+}
+function closeMap(){
+  document.getElementById('mapModal').classList.remove('open');
+  document.body.style.overflow='';
+  mapEditId=null;
+}
+function saveAdjustedPin(){
+  if(!mapInstance||!mapEditId)return;
+  const c=mapInstance.getCenter();
+  const newLat=c.lat.toFixed(6),newLng=c.lng.toFixed(6);
+  locations=locations.map(l=>l.id===mapEditId?{...l,lat:newLat,lng:newLng}:l);
+  localStorage.setItem('locationvault',JSON.stringify(locations));
+  closeMap();renderSaved();showToast('✅ Pin position updated!');
+}
 
-  function deleteLocation(id) {
-    locations = locations.filter(l => l.id !== id);
-    localStorage.setItem('locationvault', JSON.stringify(locations));
-    updateCount();
-    renderSaved();
-    showToast('🗑️ Location deleted');
-  }
-
-  function updateCount() {
-    document.getElementById('locCount').textContent = locations.length;
-  }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
-
-  // Init
-  updateCount();
+/* ════════════════════ UTILS ════════════════════ */
+function updateCount(){document.getElementById('locCount').textContent=locations.length;}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+updateCount();
 </script>
 </body>
 </html>

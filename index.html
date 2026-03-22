@@ -8,46 +8,46 @@
 <meta name="apple-mobile-web-app-title" content="LocationVault">
 <meta name="theme-color" content="#1a1400">
 <title>LocationVault</title>
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1400'/%3E%3Ccircle cx='256' cy='200' r='90' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='42' fill='%231a1400'/%3E%3Cellipse cx='256' cy='200' rx='90' ry='90' fill='none' stroke='%23f59e0b' stroke-width='12'/%3E%3Cpath d='M256 280 C256 280 176 360 176 420 Q176 460 256 460 Q336 460 336 420 Q336 360 256 280Z' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='30' fill='%23fbbf24'/%3E%3C/svg%3E">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1400'/%3E%3Ccircle cx='256' cy='200' r='90' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='42' fill='%231a1400'/%3E%3Cpath d='M256 280 C256 280 176 360 176 420 Q176 460 256 460 Q336 460 336 420 Q336 360 256 280Z' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='30' fill='%23fbbf24'/%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<!-- Icon generated dynamically via canvas - see script at bottom -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#110e00; --surface:#1c1800; --surface2:#252000;
-    --border:rgba(251,191,36,0.18); --accent:#fbbf24; --accent2:#f59e0b;
-    --green:#34d399; --red:#f87171; --amber:#fbbf24; --wa:#25D366;
-    --text:#fef9e7; --muted:#a08c3a; --radius:16px;
+  :root{
+    --bg:#110e00;--surface:#1c1800;--surface2:#252000;
+    --border:rgba(251,191,36,0.18);--accent:#fbbf24;--accent2:#f59e0b;
+    --green:#34d399;--red:#f87171;--amber:#fbbf24;--wa:#25D366;
+    --text:#fef9e7;--muted:#a08c3a;--radius:16px;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:calc(80px + env(safe-area-inset-bottom));}
+  body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:calc(90px + env(safe-area-inset-bottom));}
 
-  /* Header */
+  /* ── Header ── */
   .header{background:linear-gradient(135deg,#1c1800 0%,#110e00 100%);border-bottom:1px solid var(--border);padding:20px 20px 16px;padding-top:calc(20px + env(safe-area-inset-top));position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
   .header-top{display:flex;align-items:center;justify-content:space-between;}
   .logo{display:flex;align-items:center;gap:10px;}
-  .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .logo-icon{width:40px;height:40px;border-radius:12px;overflow:hidden;flex-shrink:0;}
+  .logo-icon img{width:100%;height:100%;object-fit:cover;}
   .logo-words{display:flex;flex-direction:column;gap:1px;}
   .logo-text{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
   .logo-by{font-size:10px;color:var(--muted);letter-spacing:.5px;font-weight:500;opacity:.8;}
   .count-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:13px;color:var(--muted);}
   .count-badge span{color:var(--accent);font-weight:600;}
 
-  /* Tabs */
+  /* ── Tabs ── */
   .tabs{display:flex;gap:5px;margin-top:14px;}
   .tab{flex:1;padding:7px 2px;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;background:var(--surface2);color:var(--muted);line-height:1.4;}
   .tab.active{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1400;}
 
-  /* Views */
+  /* ── Views ── */
   .view{display:none;padding:20px;}
   .view.active{display:block;}
 
-  /* Cards */
+  /* ── Card ── */
   .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
   .card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
 
-  /* Form */
+  /* ── Form ── */
   .form-group{margin-bottom:14px;}
   .form-label{font-size:13px;color:var(--muted);margin-bottom:6px;display:block;}
   .form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none;}
@@ -55,14 +55,14 @@
   .form-input::placeholder{color:var(--muted);}
   textarea.form-input{resize:none;height:80px;}
 
-  /* GPS btn */
+  /* ── GPS btn ── */
   .gps-btn{width:100%;padding:14px;border:2px dashed var(--border);border-radius:12px;background:transparent;color:var(--accent);font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
   .gps-btn:hover{background:rgba(251,191,36,.06);border-color:var(--accent);}
   .gps-btn.got{border-style:solid;border-color:var(--green);color:var(--green);}
   .gps-btn.loading{border-color:var(--amber);color:var(--amber);}
   .gps-coords{font-size:11px;color:var(--muted);text-align:center;margin-top:6px;font-family:monospace;line-height:1.5;}
 
-  /* Photo upload */
+  /* ── Photo upload ── */
   .photo-upload{width:100%;height:140px;border:2px dashed var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all .2s;overflow:hidden;position:relative;background:var(--surface2);}
   .photo-upload:hover{border-color:var(--accent2);}
   .photo-upload img{position:absolute;width:100%;height:100%;object-fit:cover;}
@@ -72,48 +72,49 @@
   .photo-upload .upload-text{font-size:13px;color:var(--muted);}
   .photo-upload input{display:none;}
 
-  /* Save btn */
+  /* ── Save btn ── */
   .save-btn{width:100%;padding:16px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;border-radius:12px;color:#1a1400;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
   .save-btn:active{transform:scale(.98);opacity:.9;}
 
-  /* WhatsApp badge + tip */
+  /* ── WA badge + tip ── */
   .wa-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,.12);color:var(--wa);border:1px solid rgba(37,211,102,.25);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;margin-bottom:12px;}
   .tip-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px;}
   .tip-box b{color:var(--text);}
 
-  /* Saved */
+  /* ── Saved list ── */
   .search-bar{position:relative;margin-bottom:16px;}
   .search-bar input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px 12px 40px;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--text);outline:none;-webkit-appearance:none;}
   .search-bar input:focus{border-color:var(--accent);}
   .search-bar input::placeholder{color:var(--muted);}
   .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;}
-  .location-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;animation:slideIn .3s ease;}
+
+  .location-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;animation:slideIn .3s ease;}
   @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-  .loc-photo{width:100%;height:160px;object-fit:cover;display:block;}
+  .loc-photo{width:100%;height:180px;object-fit:cover;display:block;}
   .loc-no-photo{width:100%;height:80px;background:linear-gradient(135deg,#252000,#1c1800);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--muted);}
-  .loc-body{padding:14px;}
-  .loc-name{font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .loc-body{padding:16px;}
+  .loc-name{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
   .loc-name-text{flex:1;}
-  .loc-note{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.4;}
-  .loc-coords{font-size:11px;color:var(--muted);font-family:monospace;margin-bottom:12px;}
+  .loc-note{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+  .loc-coords{font-size:11px;color:var(--muted);font-family:monospace;margin-bottom:14px;display:flex;align-items:center;gap:4px;}
   .loc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
   .loc-actions-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .action-btn{padding:10px 6px;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s;}
+  .action-btn{padding:11px 6px;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s;}
   .action-btn:active{transform:scale(.95);}
   .btn-maps{background:rgba(251,191,36,.12);color:var(--accent);border:1px solid rgba(251,191,36,.25);}
   .btn-wa{background:rgba(37,211,102,.12);color:var(--wa);border:1px solid rgba(37,211,102,.2);}
   .btn-pin{background:rgba(129,140,248,.12);color:#818cf8;border:1px solid rgba(129,140,248,.2);}
   .btn-delete{background:rgba(248,113,113,.10);color:var(--red);border:1px solid rgba(248,113,113,.15);}
   .btn-icon{font-size:18px;}
-  .date-badge{font-size:11px;color:var(--muted);background:var(--surface2);padding:3px 8px;border-radius:6px;white-space:nowrap;}
+  .date-badge{font-size:11px;color:var(--muted);background:var(--surface2);padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;}
 
-  /* Empty */
+  /* ── Empty ── */
   .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
   .empty-state .empty-icon{font-size:56px;margin-bottom:16px;}
   .empty-state h3{font-size:18px;color:var(--text);margin-bottom:8px;}
   .empty-state p{font-size:14px;line-height:1.5;}
 
-  /* Map Modal */
+  /* ── Map Modal ── */
   .map-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.9);backdrop-filter:blur(8px);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .25s;}
   .map-modal.open{opacity:1;pointer-events:all;}
   .map-header{background:linear-gradient(135deg,#1c1800,#110e00);border-bottom:1px solid var(--border);padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
@@ -132,18 +133,29 @@
   .map-btn-cancel{padding:13px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
   .map-btn-save{padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1400;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
 
-  /* Toast */
-  .toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--text);z-index:999;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;}
+  /* ── Share Modal ── */
+  .share-modal{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .share-modal.open{opacity:1;pointer-events:all;}
+  .share-sheet{background:var(--surface);border:1px solid var(--border);border-radius:24px 24px 0 0;padding:24px 20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));width:100%;max-width:520px;}
+  .share-sheet-title{font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:16px;}
+  .card-preview-wrap{border-radius:16px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border);background:#000;}
+  #shareCardCanvas{width:100%;height:auto;display:block;}
+  .share-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .share-btn-wa{padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#25D366,#1db954);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .share-btn-cancel{padding:15px;border:1px solid var(--border);border-radius:14px;background:var(--surface2);color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
+  .share-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5;}
+
+  /* ── Toast ── */
+  .toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--text);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  /* Spinner */
+  /* ── Spinner ── */
   @keyframes spin{to{transform:rotate(360deg)}}
   .spinner{width:16px;height:16px;border:2px solid rgba(251,191,36,.3);border-top-color:#fbbf24;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
 
-  /* Credit */
+  /* ── Credit ── */
   .credit{text-align:center;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;padding:20px 0 8px;opacity:.5;}
 
-  /* Leaflet */
   .leaflet-control-attribution{display:none!important;}
   .leaflet-container{background:#1c1800;}
 </style>
@@ -154,7 +166,7 @@
 <div class="header">
   <div class="header-top">
     <div class="logo">
-      <div class="logo-icon">📍</div>
+      <div class="logo-icon"><img id="appIconImg" src="" alt=""></div>
       <div class="logo-words">
         <div class="logo-text">LocationVault</div>
         <div class="logo-by">Created by Harish Churathil</div>
@@ -203,7 +215,7 @@
   <div class="credit">HARISH CHURATHIL</div>
 </div>
 
-<!-- ═══ TAB 2 — PASTE LINK / COORDS ═══ -->
+<!-- ═══ TAB 2 — PASTE LINK ═══ -->
 <div id="view-paste" class="view">
   <div class="card">
     <div class="card-title">🔗 Paste Map Link or Coordinates</div>
@@ -245,15 +257,13 @@
     <div class="wa-badge">💬 WhatsApp Location Import</div>
     <div class="tip-box">
       <b>How to save a WhatsApp location:</b><br>
-      1️⃣ Open the location message in WhatsApp<br>
-      2️⃣ Tap &amp; hold the message → tap <b>Copy</b><br>
-      3️⃣ Paste below and tap <b>Extract</b><br><br>
-      <b>Also works by copying the link from WhatsApp:</b><br>
-      Tap the location → tap <b>Open in Maps</b> → copy the URL from browser → paste here
+      1️⃣ Long press the location message → tap <b>Copy</b><br>
+      2️⃣ Paste below and tap <b>Extract</b><br><br>
+      <b>Or:</b> Open location → Open in Maps → copy browser URL → paste here
     </div>
     <div class="form-group">
-      <label class="form-label">Paste WhatsApp Message or Location Link</label>
-      <textarea class="form-input" id="waInput" style="height:130px;" placeholder="Paste the WhatsApp location message here...&#10;&#10;Example of what WhatsApp copies:&#10;Location&#10;https://maps.google.com/?q=25.2048,55.2708&#10;&#10;Or just paste any maps link directly"></textarea>
+      <label class="form-label">Paste WhatsApp Message or Link</label>
+      <textarea class="form-input" id="waInput" style="height:130px;" placeholder="Paste the WhatsApp location message here...&#10;&#10;e.g.&#10;Location&#10;https://maps.google.com/?q=25.2048,55.2708&#10;&#10;Or paste any maps link directly"></textarea>
     </div>
     <button class="gps-btn" onclick="parseWA()" style="border-style:solid;border-color:rgba(37,211,102,.6);color:var(--wa);margin-bottom:8px;">
       <span>📥</span><span>Extract from WhatsApp</span>
@@ -264,7 +274,7 @@
     <div class="card-title">📌 Location Details</div>
     <div class="form-group">
       <label class="form-label">Place Name *</label>
-      <input type="text" class="form-input" id="waName" placeholder="e.g. Customer Location, Delivery Point..." maxlength="80">
+      <input type="text" class="form-input" id="waName" placeholder="e.g. Customer, Delivery Point..." maxlength="80">
     </div>
     <div class="form-group">
       <label class="form-label">Notes (optional)</label>
@@ -293,12 +303,12 @@
   <div class="credit">HARISH CHURATHIL</div>
 </div>
 
-<!-- ═══ MAP MODAL — ADJUST PIN ═══ -->
+<!-- ═══ MAP MODAL ═══ -->
 <div class="map-modal" id="mapModal">
   <div class="map-header">
     <div>
       <div class="map-title" id="mapModalTitle">Adjust Pin</div>
-      <div class="map-subtitle">Pan the map to move the 📍 pin to the exact spot</div>
+      <div class="map-subtitle">Pan the map to move the 📍 to the exact spot</div>
     </div>
     <button class="map-close" onclick="closeMap()">✕</button>
   </div>
@@ -309,7 +319,7 @@
   </div>
   <div class="map-info-bar">
     <div class="map-coords-live" id="mapCoordsLive">— , —</div>
-    <div class="map-hint">Pan &amp; zoom until the pin is exactly on your location, then tap Save</div>
+    <div class="map-hint">Pan &amp; zoom until the pin is exactly on your spot, then save</div>
     <div class="map-actions">
       <button class="map-btn-cancel" onclick="closeMap()">Cancel</button>
       <button class="map-btn-save"   onclick="saveAdjustedPin()">✅ Save Position</button>
@@ -317,44 +327,162 @@
   </div>
 </div>
 
+<!-- ═══ SHARE CARD MODAL ═══ -->
+<div class="share-modal" id="shareModal">
+  <div class="share-sheet">
+    <div class="share-sheet-title">📤 Share Location Card</div>
+    <div class="card-preview-wrap">
+      <canvas id="shareCardCanvas"></canvas>
+    </div>
+    <div class="share-btns">
+      <button class="share-btn-wa" onclick="doShareWhatsApp()">💬 Share via WhatsApp</button>
+      <button class="share-btn-cancel" onclick="closeShareModal()">Cancel</button>
+    </div>
+    <div class="share-hint" id="shareHint">Tap Share — the card image will open for you to send in WhatsApp</div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<!-- Hidden canvas for icon generation -->
+<canvas id="iconCanvas" style="display:none;"></canvas>
+
 <script>
-/* ════════════════════ STATE ════════════════════ */
+/* ══════════ STATE ══════════ */
 let locations   = JSON.parse(localStorage.getItem('locationvault') || '[]');
 let currentLat  = null, currentLng  = null;
 let parsedLat   = null, parsedLng   = null;
 let waParsedLat = null, waParsedLng = null;
 let photoDataMap= {photoUpload:null,pastePhotoUpload:null,waPhotoUpload:null};
 let mapInstance = null, mapEditId = null;
+let shareLocId  = null;
 
-/* ════════════════════ TABS ════════════════════ */
+/* ══════════ ICON GENERATOR ══════════
+   Draws a beautiful PNG icon using Canvas, injects it as apple-touch-icon
+   and favicon, and shows it in the header logo.
+*/
+function generateAppIcon(){
+  const c = document.getElementById('iconCanvas');
+  const S = 512;
+  c.width = S; c.height = S;
+  const ctx = c.getContext('2d');
+
+  // Background — rounded rect
+  const r = 112;
+  ctx.beginPath();
+  ctx.moveTo(r,0);ctx.lineTo(S-r,0);ctx.quadraticCurveTo(S,0,S,r);
+  ctx.lineTo(S,S-r);ctx.quadraticCurveTo(S,S,S-r,S);
+  ctx.lineTo(r,S);ctx.quadraticCurveTo(0,S,0,S-r);
+  ctx.lineTo(0,r);ctx.quadraticCurveTo(0,0,r,0);
+  ctx.closePath();
+  // Dark gold background gradient
+  const bg = ctx.createLinearGradient(0,0,S,S);
+  bg.addColorStop(0,'#1c1500');
+  bg.addColorStop(1,'#0d0900');
+  ctx.fillStyle = bg;
+  ctx.fill();
+
+  // Subtle grid lines
+  ctx.strokeStyle='rgba(251,191,36,0.06)';ctx.lineWidth=1;
+  for(let i=0;i<S;i+=40){
+    ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,S);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(S,i);ctx.stroke();
+  }
+
+  // Outer glow ring
+  const glow = ctx.createRadialGradient(256,220,60,256,220,180);
+  glow.addColorStop(0,'rgba(251,191,36,0.18)');
+  glow.addColorStop(1,'rgba(251,191,36,0)');
+  ctx.fillStyle=glow;ctx.fillRect(0,0,S,S);
+
+  // Pin stem — rounded bottom teardrop
+  ctx.beginPath();
+  ctx.moveTo(256,390);
+  ctx.bezierCurveTo(220,340,130,280,130,200);
+  ctx.bezierCurveTo(130,115,185,60,256,60);
+  ctx.bezierCurveTo(327,60,382,115,382,200);
+  ctx.bezierCurveTo(382,280,292,340,256,390);
+  ctx.closePath();
+  const pinGrad = ctx.createLinearGradient(130,60,382,390);
+  pinGrad.addColorStop(0,'#ffe066');
+  pinGrad.addColorStop(0.5,'#fbbf24');
+  pinGrad.addColorStop(1,'#d97706');
+  ctx.fillStyle=pinGrad;
+  ctx.shadowColor='rgba(251,191,36,0.6)';
+  ctx.shadowBlur=30;
+  ctx.fill();
+  ctx.shadowBlur=0;
+
+  // Pin hole (dark circle inside)
+  ctx.beginPath();
+  ctx.arc(256,200,62,0,Math.PI*2);
+  ctx.fillStyle='#0d0900';
+  ctx.fill();
+
+  // Inner ring
+  ctx.beginPath();
+  ctx.arc(256,200,50,0,Math.PI*2);
+  const innerRing = ctx.createLinearGradient(206,150,306,250);
+  innerRing.addColorStop(0,'#ffe066');
+  innerRing.addColorStop(1,'#f59e0b');
+  ctx.strokeStyle=innerRing;
+  ctx.lineWidth=8;
+  ctx.stroke();
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(256,200,18,0,Math.PI*2);
+  ctx.fillStyle='#fbbf24';
+  ctx.shadowColor='rgba(251,191,36,0.8)';
+  ctx.shadowBlur=15;
+  ctx.fill();
+  ctx.shadowBlur=0;
+
+  // Small "LV" text at bottom
+  ctx.font='bold 38px Arial';
+  ctx.fillStyle='rgba(251,191,36,0.35)';
+  ctx.textAlign='center';
+  ctx.fillText('LV',256,460);
+
+  const dataUrl = c.toDataURL('image/png');
+
+  // Set apple-touch-icon
+  let link = document.querySelector("link[rel='apple-touch-icon']");
+  if(!link){link=document.createElement('link');link.rel='apple-touch-icon';document.head.appendChild(link);}
+  link.href=dataUrl;
+
+  // Set favicon
+  let icon = document.querySelector("link[rel='icon']");
+  if(!icon){icon=document.createElement('link');icon.rel='icon';icon.type='image/png';document.head.appendChild(icon);}
+  icon.href=dataUrl;
+
+  // Show in header
+  document.getElementById('appIconImg').src=dataUrl;
+}
+
+/* ══════════ TABS ══════════ */
 function switchTab(tab){
   const keys=['add','paste','wa','saved'];
   const ids =['view-add','view-paste','view-wa','view-saved'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',keys[i]===tab));
   ids.forEach((v,i)=>document.getElementById(v).classList.toggle('active',keys[i]===tab));
-  if(tab==='saved') renderSaved();
+  if(tab==='saved')renderSaved();
 }
 
-/* ════════════════════ GPS ════════════════════ */
+/* ══════════ GPS ══════════ */
 function getLocation(){
   const btn=document.getElementById('gpsBtn');
   const icon=document.getElementById('gpsBtnIcon');
   const text=document.getElementById('gpsBtnText');
   const coord=document.getElementById('gpsCoords');
-  btn.className='gps-btn loading';
-  icon.innerHTML='<div class="spinner"></div>';
-  text.textContent='Getting location...';
+  btn.className='gps-btn loading';icon.innerHTML='<div class="spinner"></div>';text.textContent='Getting location...';
   if(!navigator.geolocation){showToast('❌ Geolocation not supported');resetGps();return;}
   navigator.geolocation.getCurrentPosition(
     pos=>{
-      currentLat=pos.coords.latitude.toFixed(6);
-      currentLng=pos.coords.longitude.toFixed(6);
+      currentLat=pos.coords.latitude.toFixed(6);currentLng=pos.coords.longitude.toFixed(6);
       btn.className='gps-btn got';icon.textContent='✅';text.textContent='Location Captured!';
-      coord.textContent=`${currentLat}, ${currentLng}`;
-      showToast('✅ Location captured!');
+      coord.textContent=`${currentLat}, ${currentLng}`;showToast('✅ Location captured!');
     },
     err=>{resetGps();coord.textContent='';showToast(err.code===1?'❌ Permission denied':'❌ Could not get location');},
     {enableHighAccuracy:true,timeout:15000}
@@ -370,14 +498,12 @@ function saveLocation(){
   if(!name){showToast('⚠️ Please enter a place name');return;}
   if(!currentLat||!currentLng){showToast('⚠️ Please capture GPS location first');return;}
   doSave({name,note:document.getElementById('placeNote').value.trim(),lat:currentLat,lng:currentLng,photo:photoDataMap.photoUpload});
-  document.getElementById('placeName').value='';
-  document.getElementById('placeNote').value='';
-  document.getElementById('gpsCoords').textContent='';
-  resetGps(); currentLat=null;currentLng=null;
-  clearPhoto('photoUpload');
+  document.getElementById('placeName').value='';document.getElementById('placeNote').value='';
+  document.getElementById('gpsCoords').textContent='';resetGps();
+  currentLat=null;currentLng=null;clearPhoto('photoUpload');
 }
 
-/* ════════════════════ PHOTO ════════════════════ */
+/* ══════════ PHOTO ══════════ */
 function handlePhoto(e,wrapId){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -400,31 +526,18 @@ function clearPhoto(wrapId){
   wrap.querySelector('.upload-text').style.display='';
 }
 
-/* ════════════════════ COORD EXTRACTOR ════════════════════ */
+/* ══════════ COORD EXTRACTOR ══════════ */
 function extractCoords(raw){
   let m;
-  // @lat,lng  (Google Maps URL style)
-  m=raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  // ?q=lat,lng
-  m=raw.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  // ll=lat,lng
-  m=raw.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  // destination=lat,lng
-  m=raw.match(/destination=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  // center=lat,lng
-  m=raw.match(/center=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  // plain "lat, lng" anywhere
-  m=raw.match(/(-?\d{1,3}\.\d{4,})[,\s]+(-?\d{1,3}\.\d{4,})/);
-  if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  m=raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  m=raw.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  m=raw.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  m=raw.match(/destination=(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  m=raw.match(/center=(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+  m=raw.match(/(-?\d{1,3}\.\d{4,})[,\s]+(-?\d{1,3}\.\d{4,})/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
   return null;
 }
 function isValid(lat,lng){return lat>=-90&&lat<=90&&lng>=-180&&lng<=180;}
-
 function tryShortLink(url,onSuccess,onFail){
   fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
     .then(r=>r.json()).then(d=>{
@@ -434,12 +547,11 @@ function tryShortLink(url,onSuccess,onFail){
     }).catch(()=>onFail('network'));
 }
 
-/* ════════════════════ PASTE TAB ════════════════════ */
+/* ══════════ PASTE TAB ══════════ */
 function parseInput(){
   const raw=document.getElementById('pasteInput').value.trim();
-  const el=document.getElementById('parseResult');
-  const card=document.getElementById('pasteDetailsCard');
-  if(!raw){showToast('⚠️ Please paste a link or coordinates');return;}
+  const el=document.getElementById('parseResult');const card=document.getElementById('pasteDetailsCard');
+  if(!raw){showToast('⚠️ Please paste something');return;}
   const c=extractCoords(raw);
   if(c&&isValid(c[0],c[1])){
     parsedLat=c[0].toFixed(6);parsedLng=c[1].toFixed(6);
@@ -449,11 +561,10 @@ function parseInput(){
     el.innerHTML='<span style="color:var(--amber)">⏳ Resolving short link…</span>';
     tryShortLink(raw,
       (la,ln)=>{parsedLat=la;parsedLng=ln;el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;card.style.display='block';},
-      type=>el.innerHTML=`<span style="color:var(--red)">❌ ${type==='network'?'Link failed. Open in browser, copy full URL and paste here.':'Could not extract. Paste the full Google Maps URL.'}</span>`
+      type=>el.innerHTML=`<span style="color:var(--red)">❌ ${type==='network'?'Open in browser, copy full URL':'Could not extract. Paste the full Google Maps URL.'}</span>`
     );
   } else {
-    el.innerHTML='<span style="color:var(--red)">❌ No coordinates found. Try a full Google Maps URL.</span>';
-    card.style.display='none';
+    el.innerHTML='<span style="color:var(--red)">❌ No coordinates found.</span>';card.style.display='none';
   }
 }
 function savePastedLocation(){
@@ -467,11 +578,10 @@ function savePastedLocation(){
   parsedLat=null;parsedLng=null;clearPhoto('pastePhotoUpload');
 }
 
-/* ════════════════════ WHATSAPP TAB ════════════════════ */
+/* ══════════ WA IMPORT TAB ══════════ */
 function parseWA(){
   const raw=document.getElementById('waInput').value.trim();
-  const el=document.getElementById('waResult');
-  const card=document.getElementById('waDetailsCard');
+  const el=document.getElementById('waResult');const card=document.getElementById('waDetailsCard');
   if(!raw){showToast('⚠️ Please paste the WhatsApp message');return;}
   const c=extractCoords(raw);
   if(c&&isValid(c[0],c[1])){
@@ -479,16 +589,15 @@ function parseWA(){
     el.innerHTML=`<span style="color:var(--green)">✅ Location found: ${waParsedLat}, ${waParsedLng}</span>`;
     card.style.display='block';showToast('✅ WhatsApp location extracted!');
   } else {
-    // Try to find any URL in the text and resolve it
     const urlMatch=raw.match(/https?:\/\/[^\s]+/);
     if(urlMatch){
       el.innerHTML='<span style="color:var(--amber)">⏳ Resolving link…</span>';
       tryShortLink(urlMatch[0],
-        (la,ln)=>{waParsedLat=la;waParsedLng=ln;el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;card.style.display='block';showToast('✅ Location extracted!');},
-        ()=>el.innerHTML='<span style="color:var(--red)">❌ Could not extract location. Try copying the full maps URL from your browser.</span>'
+        (la,ln)=>{waParsedLat=la;waParsedLng=ln;el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;card.style.display='block';showToast('✅ Extracted!');},
+        ()=>el.innerHTML='<span style="color:var(--red)">❌ Could not extract. Try copying full URL from browser.</span>'
       );
     } else {
-      el.innerHTML='<span style="color:var(--red)">❌ No location found. Make sure you copied the full WhatsApp message with the link.</span>';
+      el.innerHTML='<span style="color:var(--red)">❌ No location found. Copy the full WhatsApp message.</span>';
       card.style.display='none';
     }
   }
@@ -504,19 +613,17 @@ function saveWALocation(){
   waParsedLat=null;waParsedLng=null;clearPhoto('waPhotoUpload');
 }
 
-/* ════════════════════ CORE SAVE ════════════════════ */
+/* ══════════ CORE SAVE ══════════ */
 function doSave({name,note,lat,lng,photo}){
-  const loc={
-    id:Date.now(),name,note:note||'',lat,lng,photo:photo||null,
-    date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
-  };
+  const loc={id:Date.now(),name,note:note||'',lat,lng,photo:photo||null,
+    date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})};
   locations.unshift(loc);
   localStorage.setItem('locationvault',JSON.stringify(locations));
   updateCount();showToast('✅ Location saved!');
   setTimeout(()=>switchTab('saved'),800);
 }
 
-/* ════════════════════ SAVED LIST ════════════════════ */
+/* ══════════ SAVED LIST ══════════ */
 function renderSaved(){
   const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
   const list=document.getElementById('savedList');
@@ -534,7 +641,7 @@ function renderSaved(){
         <div class="loc-coords">📌 ${loc.lat}, ${loc.lng}</div>
         <div class="loc-actions">
           <button class="action-btn btn-maps" onclick="openMaps('${loc.lat}','${loc.lng}')"><span class="btn-icon">🗺️</span>Google Maps</button>
-          <button class="action-btn btn-wa"   onclick="shareWA('${loc.name}','${loc.lat}','${loc.lng}','${(loc.note||'').replace(/'/g,"\\'")}')"><span class="btn-icon">💬</span>WhatsApp</button>
+          <button class="action-btn btn-wa"   onclick="openShareModal(${loc.id})"><span class="btn-icon">💬</span>WhatsApp Card</button>
         </div>
         <div class="loc-actions-2">
           <button class="action-btn btn-pin"    onclick="openMapEditor(${loc.id})"><span class="btn-icon">🖐</span>Adjust Pin</button>
@@ -544,22 +651,267 @@ function renderSaved(){
     </div>`).join('');
 }
 
-/* ════════════════════ ACTIONS ════════════════════ */
+/* ══════════ MAPS / DELETE ══════════ */
 function openMaps(lat,lng){window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');}
-function shareWA(name,lat,lng,note){
-  const link=`https://www.google.com/maps?q=${lat},${lng}`;
-  let msg=`📍 *${name}*`;
-  if(note)msg+=`\n\n_${note}_`;
-  msg+=`\n\n🗺️ *Google Maps:*\n${link}\n\n📌 Coordinates: ${lat}, ${lng}\n\n_Shared via LocationVault_`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
-}
 function deleteLocation(id){
   locations=locations.filter(l=>l.id!==id);
   localStorage.setItem('locationvault',JSON.stringify(locations));
   updateCount();renderSaved();showToast('🗑️ Location deleted');
 }
 
-/* ════════════════════ MAP EDITOR ════════════════════ */
+/* ══════════════════════════════════════════════════════
+   BEAUTIFUL WHATSAPP CARD — drawn on Canvas
+══════════════════════════════════════════════════════ */
+function openShareModal(id){
+  const loc=locations.find(l=>l.id===id);if(!loc)return;
+  shareLocId=id;
+  document.getElementById('shareModal').classList.add('open');
+  drawShareCard(loc);
+}
+function closeShareModal(){
+  document.getElementById('shareModal').classList.remove('open');
+  shareLocId=null;
+}
+
+function drawShareCard(loc){
+  const canvas=document.getElementById('shareCardCanvas');
+  const W=900, hasPhoto=!!loc.photo;
+  const photoH=hasPhoto?420:0;
+  const textPad=36;
+  const nameSize=52, noteSize=32, metaSize=26, linkSize=28, footerSize=22;
+  const lineH=1.4;
+
+  // Measure text heights
+  const tempCtx=document.createElement('canvas').getContext('2d');
+  function wrapText(ctx,text,maxW,size){
+    ctx.font=`600 ${size}px "Space Grotesk",Arial`;
+    const words=text.split(' ');let lines=[],line='';
+    for(const w of words){
+      const test=line?line+' '+w:w;
+      if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}
+      else line=test;
+    }
+    if(line)lines.push(line);
+    return lines;
+  }
+
+  const innerW=W-textPad*2;
+  tempCtx.font=`700 ${nameSize}px "Space Grotesk",Arial`;
+  const nameLines=wrapText(tempCtx,loc.name,innerW,nameSize);
+  const noteLines=loc.note?wrapText(tempCtx,loc.note,innerW,noteSize):[];
+  const mapsLink=`maps.google.com/?q=${loc.lat},${loc.lng}`;
+
+  const nameBH  = nameLines.length*nameSize*lineH+16;
+  const noteBH  = noteLines.length*(noteSize*lineH)+( noteLines.length?24:0 );
+  const coordBH = metaSize*lineH+16;
+  const linkBH  = linkSize*lineH+16;
+  const footBH  = 70;
+  const dividers= 3; // lines between sections
+  const totalH  = photoH + textPad + nameBH + noteBH + coordBH + linkBH + footBH + textPad + dividers*2;
+
+  canvas.width=W; canvas.height=Math.round(totalH);
+  const ctx=canvas.getContext('2d');
+
+  /* ── Background ── */
+  const bgGrad=ctx.createLinearGradient(0,0,W,totalH);
+  bgGrad.addColorStop(0,'#1c1500');
+  bgGrad.addColorStop(1,'#0d0900');
+  ctx.fillStyle=bgGrad;
+  ctx.fillRect(0,0,W,totalH);
+
+  /* ── Subtle dot grid ── */
+  ctx.fillStyle='rgba(251,191,36,0.04)';
+  for(let x=0;x<W;x+=30)for(let y=0;y<totalH;y+=30){
+    ctx.beginPath();ctx.arc(x,y,1.5,0,Math.PI*2);ctx.fill();
+  }
+
+  /* ── Photo ── */
+  let drawY=0;
+  if(hasPhoto){
+    const img=new Image();
+    img.src=loc.photo;
+    // draw after image loads — use sync if already cached
+    try{
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0,0,W,photoH);
+      ctx.clip();
+      // cover fit
+      const iRatio=img.naturalWidth/img.naturalHeight;
+      const cRatio=W/photoH;
+      let sw,sh,sx=0,sy=0;
+      if(iRatio>cRatio){sh=img.naturalHeight;sw=sh*cRatio;sx=(img.naturalWidth-sw)/2;}
+      else{sw=img.naturalWidth;sh=sw/cRatio;sy=(img.naturalHeight-sh)/2;}
+      ctx.drawImage(img,sx,sy,sw,sh,0,0,W,photoH);
+      // Gradient overlay at bottom of photo for smooth transition
+      const fadeGrad=ctx.createLinearGradient(0,photoH-120,0,photoH);
+      fadeGrad.addColorStop(0,'rgba(17,10,0,0)');
+      fadeGrad.addColorStop(1,'rgba(17,10,0,0.95)');
+      ctx.fillStyle=fadeGrad;
+      ctx.fillRect(0,0,W,photoH);
+      ctx.restore();
+    }catch(e){}
+    drawY=photoH;
+  }
+
+  /* ── Top accent bar ── */
+  if(!hasPhoto){
+    const accentGrad=ctx.createLinearGradient(0,0,W,0);
+    accentGrad.addColorStop(0,'#fbbf24');
+    accentGrad.addColorStop(0.5,'#f59e0b');
+    accentGrad.addColorStop(1,'#d97706');
+    ctx.fillStyle=accentGrad;
+    ctx.fillRect(0,0,W,8);
+    drawY=8;
+  }
+
+  drawY+=textPad;
+
+  /* ── Pin icon + Name ── */
+  // Pin emoji
+  ctx.font=`${nameSize+4}px Arial`;
+  ctx.fillText('📍',textPad-4,drawY+nameSize);
+  // Name text
+  ctx.font=`700 ${nameSize}px "Space Grotesk",Arial`;
+  ctx.fillStyle='#fef9e7';
+  const nameX=textPad+nameSize+8;
+  let ny=drawY;
+  for(const line of nameLines){
+    ctx.fillText(line,nameX,ny+nameSize);
+    ny+=nameSize*lineH;
+  }
+  drawY+=nameBH;
+
+  /* ── Thin gold rule ── */
+  const drawRule=(y)=>{
+    ctx.beginPath();ctx.moveTo(textPad,y);ctx.lineTo(W-textPad,y);
+    ctx.strokeStyle='rgba(251,191,36,0.2)';ctx.lineWidth=1;ctx.stroke();
+  };
+  drawRule(drawY);drawY+=16;
+
+  /* ── Note ── */
+  if(noteLines.length){
+    ctx.font=`400 ${noteSize}px "Space Grotesk",Arial`;
+    ctx.fillStyle='rgba(254,249,231,0.7)';
+    for(const line of noteLines){
+      ctx.fillText(line,textPad,drawY+noteSize);
+      drawY+=noteSize*lineH;
+    }
+    drawY+=24;
+    drawRule(drawY);drawY+=16;
+  }
+
+  /* ── Coordinates row ── */
+  ctx.font=`500 ${metaSize}px monospace`;
+  ctx.fillStyle='#fbbf24';
+  ctx.fillText(`📌  ${loc.lat},  ${loc.lng}`,textPad,drawY+metaSize);
+  drawY+=metaSize*lineH+16;
+  ctx.font=`400 ${metaSize}px "Space Grotesk",Arial`;
+  ctx.fillStyle='rgba(254,249,231,0.45)';
+  ctx.fillText(`Saved on ${loc.date}`,textPad,drawY+metaSize);
+  drawY+=metaSize*lineH+6;
+  drawRule(drawY);drawY+=16;
+
+  /* ── Maps link ── */
+  ctx.font=`600 ${linkSize}px "Space Grotesk",Arial`;
+  ctx.fillStyle='#fbbf24';
+  ctx.fillText('🗺️  '+mapsLink,textPad,drawY+linkSize);
+  drawY+=linkSize*lineH+16;
+  drawRule(drawY);drawY+=16;
+
+  /* ── Footer ── */
+  // LocationVault branding
+  ctx.font=`700 ${footerSize+4}px "Space Grotesk",Arial`;
+  ctx.fillStyle='rgba(251,191,36,0.5)';
+  ctx.fillText('📍 LocationVault',textPad,drawY+footerSize+4);
+  ctx.font=`400 ${footerSize}px "Space Grotesk",Arial`;
+  ctx.fillStyle='rgba(254,249,231,0.3)';
+  ctx.fillText('by Harish Churathil',textPad+230,drawY+footerSize+4);
+
+  // Bottom accent bar
+  const botGrad=ctx.createLinearGradient(0,0,W,0);
+  botGrad.addColorStop(0,'#fbbf24');
+  botGrad.addColorStop(0.5,'#f59e0b');
+  botGrad.addColorStop(1,'#d97706');
+  ctx.fillStyle=botGrad;
+  ctx.fillRect(0,totalH-8,W,8);
+}
+
+/* Redraw after photo loads */
+function openShareModalFull(id){
+  const loc=locations.find(l=>l.id===id);if(!loc)return;
+  if(loc.photo){
+    const img=new Image();
+    img.onload=()=>drawShareCard(loc);
+    img.src=loc.photo;
+  }
+}
+
+function openShareModal(id){
+  const loc=locations.find(l=>l.id===id);if(!loc)return;
+  shareLocId=id;
+  document.getElementById('shareModal').classList.add('open');
+  if(loc.photo){
+    const img=new Image();
+    img.onload=()=>drawShareCard(loc);
+    img.onerror=()=>drawShareCard(loc);
+    img.src=loc.photo;
+  } else {
+    drawShareCard(loc);
+  }
+}
+
+async function doShareWhatsApp(){
+  const loc=locations.find(l=>l.id===shareLocId);if(!loc)return;
+  const canvas=document.getElementById('shareCardCanvas');
+  const mapsLink=`https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
+
+  // Try Web Share API with image file (shows as card in WhatsApp)
+  if(navigator.share && navigator.canShare){
+    try{
+      canvas.toBlob(async(blob)=>{
+        if(!blob)throw new Error('no blob');
+        const file=new File([blob],[`${loc.name.replace(/\s+/g,'_')}.png`],{type:'image/png'});
+        const shareData={
+          title: loc.name,
+          text: `📍 ${loc.name}${loc.note?'\n'+loc.note:''}\n\n🗺️ ${mapsLink}\n📌 ${loc.lat}, ${loc.lng}\n\n_Shared via LocationVault_`,
+          files: [file]
+        };
+        if(navigator.canShare(shareData)){
+          await navigator.share(shareData);
+          showToast('✅ Shared!');
+          closeShareModal();
+          return;
+        }
+        fallbackShare(canvas,mapsLink,loc);
+      },'image/png',0.95);
+      return;
+    }catch(e){
+      if(e.name!=='AbortError') fallbackShare(canvas,mapsLink,loc);
+      else closeShareModal();
+      return;
+    }
+  }
+  fallbackShare(canvas,mapsLink,loc);
+}
+
+function fallbackShare(canvas,mapsLink,loc){
+  // Offer download of image + open WhatsApp text
+  canvas.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=`${loc.name.replace(/\s+/g,'_')}_location.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },'image/png',0.95);
+  setTimeout(()=>{
+    const msg=`📍 *${loc.name}*${loc.note?'\n\n_'+loc.note+'_':''}\n\n🗺️ *Google Maps:*\n${mapsLink}\n\n📌 Coordinates: ${loc.lat}, ${loc.lng}\n\n_Shared via LocationVault_`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+  },600);
+  document.getElementById('shareHint').textContent='📥 Image saved! Now send it in WhatsApp along with the text link.';
+}
+
+/* ══════════ MAP EDITOR ══════════ */
 function openMapEditor(id){
   const loc=locations.find(l=>l.id===id);if(!loc)return;
   mapEditId=id;
@@ -568,26 +920,17 @@ function openMapEditor(id){
   document.body.style.overflow='hidden';
   setTimeout(()=>{
     if(mapInstance){mapInstance.remove();mapInstance=null;}
-    mapInstance=L.map('leafletMap',{
-      center:[parseFloat(loc.lat),parseFloat(loc.lng)],
-      zoom:18,zoomControl:true,attributionControl:false
-    });
+    mapInstance=L.map('leafletMap',{center:[parseFloat(loc.lat),parseFloat(loc.lng)],zoom:18,zoomControl:true,attributionControl:false});
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20}).addTo(mapInstance);
-    function updateLive(){
+    const updateLive=()=>{
       const c=mapInstance.getCenter();
       document.getElementById('mapCoordsLive').textContent=`${c.lat.toFixed(6)},  ${c.lng.toFixed(6)}`;
-    }
-    mapInstance.on('move',updateLive);
-    mapInstance.on('moveend',updateLive);
-    updateLive();
-    setTimeout(()=>mapInstance.invalidateSize(),300);
+    };
+    mapInstance.on('move',updateLive);mapInstance.on('moveend',updateLive);
+    updateLive();setTimeout(()=>mapInstance.invalidateSize(),300);
   },60);
 }
-function closeMap(){
-  document.getElementById('mapModal').classList.remove('open');
-  document.body.style.overflow='';
-  mapEditId=null;
-}
+function closeMap(){document.getElementById('mapModal').classList.remove('open');document.body.style.overflow='';mapEditId=null;}
 function saveAdjustedPin(){
   if(!mapInstance||!mapEditId)return;
   const c=mapInstance.getCenter();
@@ -597,13 +940,15 @@ function saveAdjustedPin(){
   closeMap();renderSaved();showToast('✅ Pin position updated!');
 }
 
-/* ════════════════════ UTILS ════════════════════ */
+/* ══════════ UTILS ══════════ */
 function updateCount(){document.getElementById('locCount').textContent=locations.length;}
 function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
+
+/* ══════════ INIT ══════════ */
+generateAppIcon();
 updateCount();
 </script>
 </body>

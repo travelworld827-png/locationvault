@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LocationVault">
+<meta name="theme-color" content="#1a1400">
+<title>LocationVault</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1400'/%3E%3Ccircle cx='256' cy='200' r='90' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='42' fill='%231a1400'/%3E%3Cellipse cx='256' cy='200' rx='90' ry='90' fill='none' stroke='%23f59e0b' stroke-width='12'/%3E%3Cpath d='M256 280 C256 280 176 360 176 420 Q176 460 256 460 Q336 460 336 420 Q336 360 256 280Z' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='30' fill='%23fbbf24'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1400'/%3E%3Ccircle cx='256' cy='200' r='90' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='42' fill='%231a1400'/%3E%3Cpath d='M256 280 C256 280 176 360 176 420 Q176 460 256 460 Q336 460 336 420 Q336 360 256 280Z' fill='%23fbbf24'/%3E%3Ccircle cx='256' cy='200' r='30' fill='%23fbbf24'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #110e00;
+    --surface: #1c1800;
+    --surface2: #252000;
+    --border: rgba(251,191,36,0.18);
+    --accent: #fbbf24;
+    --accent2: #f59e0b;
+    --green: #34d399;
+    --red: #f87171;
+    --amber: #fbbf24;
+    --wa: #25D366;
+    --text: #fef9e7;
+    --muted: #a08c3a;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1c1800 0%, #110e00 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 20px 16px;
+    padding-top: calc(20px + env(safe-area-inset-top));
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .logo-words {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .logo-by {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+
+  .logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .count-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .count-badge span { color: var(--accent); font-weight: 600; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+    color: var(--muted);
+  }
+
+  .tab.active {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a1400;
+  }
+
+  /* Views */
+  .view { display: none; padding: 20px; }
+  .view.active { display: block; }
+
+  /* Add Form */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--muted); }
+
+  textarea.form-input {
+    resize: none;
+    height: 80px;
+  }
+
+  /* GPS Button */
+  .gps-btn {
+    width: 100%;
+    padding: 14px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--accent);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+
+  .gps-btn:hover { background: rgba(56,189,248,0.08); border-color: var(--accent); }
+  .gps-btn.got { border-style: solid; border-color: var(--green); color: var(--green); }
+  .gps-btn.loading { border-color: var(--amber); color: var(--amber); }
+
+  .gps-coords {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 6px;
+    font-family: monospace;
+  }
+
+  /* Photo Upload */
+  .photo-upload {
+    width: 100%;
+    height: 140px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    overflow: hidden;
+    position: relative;
+    background: var(--surface2);
+  }
+
+  .photo-upload:hover { border-color: var(--accent2); }
+  .photo-upload img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+  .photo-upload .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .photo-upload:hover .overlay { opacity: 1; }
+  .photo-upload .upload-icon { font-size: 32px; }
+  .photo-upload .upload-text { font-size: 13px; color: var(--muted); }
+  .photo-upload input { display: none; }
+
+  /* Save Button */
+  .save-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border: none;
+    border-radius: 12px;
+    color: #1a1400;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .save-btn:active { transform: scale(0.98); opacity: 0.9; }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Saved Locations List */
+  .search-bar {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .search-bar input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px 12px 40px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .search-bar input:focus { border-color: var(--accent); }
+  .search-bar input::placeholder { color: var(--muted); }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  .location-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .loc-photo {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .loc-no-photo {
+    width: 100%;
+    height: 80px;
+    background: linear-gradient(135deg, #252000, #1c1800);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: var(--muted);
+  }
+
+  .loc-body { padding: 14px; }
+
+  .loc-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .loc-name-text { flex: 1; }
+
+  .loc-note {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .loc-coords {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: monospace;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .loc-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .action-btn {
+    padding: 10px 6px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .action-btn:active { transform: scale(0.95); }
+
+  .btn-maps {
+    background: rgba(251,191,36,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(251,191,36,0.25);
+  }
+
+  .btn-wa {
+    background: rgba(37,211,102,0.12);
+    color: var(--wa);
+    border: 1px solid rgba(37,211,102,0.2);
+  }
+
+  .btn-delete {
+    background: rgba(248,113,113,0.1);
+    color: var(--red);
+    border: 1px solid rgba(248,113,113,0.15);
+  }
+
+  .action-btn .btn-icon { font-size: 18px; }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  .empty-state .empty-icon { font-size: 56px; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; line-height: 1.5; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: calc(90px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Date badge */
+  .date-badge {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  /* Spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(251,191,36,0.3);
+    border-top-color: #fbbf24;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+  }
+
+  /* Credits */
+  .credit {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 20px 0 8px;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">📍</div>
+      <div class="logo-words">
+        <div class="logo-text">LocationVault</div>
+        <div class="logo-by">Created by Harish Churathil</div>
+      </div>
+    </div>
+    <div class="count-badge"><span id="locCount">0</span> saved</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('add')">➕ Add Location</button>
+    <button class="tab" onclick="switchTab('saved')">🗂️ Saved Places</button>
+  </div>
+</div>
+
+<!-- ADD LOCATION VIEW -->
+<div id="view-add" class="view active">
+
+  <div class="card">
+    <div class="card-title">📌 Location Details</div>
+
+    <div class="form-group">
+      <label class="form-label">Place Name *</label>
+      <input type="text" class="form-input" id="placeName" placeholder="e.g. Altius Office, Home, Client Site..." maxlength="80">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea class="form-input" id="placeNote" placeholder="Directions, floor number, landmark info..."></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🌐 GPS Coordinates</div>
+
+    <button class="gps-btn" id="gpsBtn" onclick="getLocation()">
+      <span id="gpsBtnIcon">📡</span>
+      <span id="gpsBtnText">Tap to Get Current Location</span>
+    </button>
+    <div class="gps-coords" id="gpsCoords"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📷 Place Photo</div>
+    <div class="photo-upload" id="photoUpload" onclick="document.getElementById('photoInput').click()">
+      <div class="upload-icon">🖼️</div>
+      <div class="upload-text">Tap to attach photo</div>
+      <div class="overlay">
+        <span style="font-size:22px">✏️</span>
+        <span style="font-size:12px;color:#fff">Change Photo</span>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
+    </div>
+  </div>
+
+  <button class="save-btn" id="saveBtn" onclick="saveLocation()">
+    <span>💾</span> Save Location
+  </button>
+
+  <div class="credit">HARISH CHURATHIL</div>
+</div>
+
+<!-- SAVED PLACES VIEW -->
+<div id="view-saved" class="view">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search saved places..." oninput="renderSaved()" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px 12px 40px;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--text);outline:none;width:100%;" />
+  </div>
+
+  <div id="savedList"></div>
+  <div class="credit">HARISH CHURATHIL</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let locations = JSON.parse(localStorage.getItem('locationvault') || '[]');
+  let currentLat = null, currentLng = null;
+  let photoData = null;
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='add')||(i===1&&tab==='saved')));
+    document.getElementById('view-add').classList.toggle('active', tab==='add');
+    document.getElementById('view-saved').classList.toggle('active', tab==='saved');
+    if (tab === 'saved') renderSaved();
+  }
+
+  function getLocation() {
+    const btn = document.getElementById('gpsBtn');
+    const icon = document.getElementById('gpsBtnIcon');
+    const text = document.getElementById('gpsBtnText');
+    const coords = document.getElementById('gpsCoords');
+
+    btn.className = 'gps-btn loading';
+    icon.innerHTML = '<div class="spinner"></div>';
+    text.textContent = 'Getting location...';
+
+    if (!navigator.geolocation) {
+      showToast('❌ Geolocation not supported');
+      btn.className = 'gps-btn';
+      icon.textContent = '📡';
+      text.textContent = 'Tap to Get Current Location';
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        currentLat = pos.coords.latitude.toFixed(6);
+        currentLng = pos.coords.longitude.toFixed(6);
+        btn.className = 'gps-btn got';
+        icon.textContent = '✅';
+        text.textContent = 'Location Captured!';
+        coords.textContent = `${currentLat}, ${currentLng}`;
+        showToast('✅ Location captured!');
+      },
+      err => {
+        btn.className = 'gps-btn';
+        icon.textContent = '📡';
+        text.textContent = 'Tap to Get Current Location';
+        coords.textContent = '';
+        if (err.code === 1) showToast('❌ Location permission denied');
+        else showToast('❌ Could not get location');
+      },
+      { enableHighAccuracy: true, timeout: 15000 }
+    );
+  }
+
+  function handlePhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      photoData = ev.target.result;
+      const wrap = document.getElementById('photoUpload');
+      let img = wrap.querySelector('img');
+      if (!img) {
+        img = document.createElement('img');
+        wrap.prepend(img);
+        wrap.querySelector('.upload-icon').style.display = 'none';
+        wrap.querySelector('.upload-text').style.display = 'none';
+      }
+      img.src = photoData;
+      showToast('📷 Photo attached!');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function saveLocation() {
+    const name = document.getElementById('placeName').value.trim();
+    if (!name) { showToast('⚠️ Please enter a place name'); return; }
+    if (!currentLat || !currentLng) { showToast('⚠️ Please capture GPS location first'); return; }
+
+    const loc = {
+      id: Date.now(),
+      name,
+      note: document.getElementById('placeNote').value.trim(),
+      lat: currentLat,
+      lng: currentLng,
+      photo: photoData,
+      date: new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+    };
+
+    locations.unshift(loc);
+    localStorage.setItem('locationvault', JSON.stringify(locations));
+    updateCount();
+
+    // Reset form
+    document.getElementById('placeName').value = '';
+    document.getElementById('placeNote').value = '';
+    document.getElementById('gpsCoords').textContent = '';
+    document.getElementById('gpsBtn').className = 'gps-btn';
+    document.getElementById('gpsBtnIcon').textContent = '📡';
+    document.getElementById('gpsBtnText').textContent = 'Tap to Get Current Location';
+    currentLat = null; currentLng = null;
+    photoData = null;
+    const wrap = document.getElementById('photoUpload');
+    const img = wrap.querySelector('img');
+    if (img) img.remove();
+    wrap.querySelector('.upload-icon').style.display = '';
+    wrap.querySelector('.upload-text').style.display = '';
+
+    showToast('✅ Location saved!');
+    setTimeout(() => switchTab('saved'), 800);
+  }
+
+  function renderSaved() {
+    const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    const list = document.getElementById('savedList');
+    const filtered = locations.filter(l =>
+      l.name.toLowerCase().includes(query) ||
+      (l.note && l.note.toLowerCase().includes(query))
+    );
+
+    if (filtered.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🗺️</div>
+          <h3>${query ? 'No results found' : 'No Saved Places Yet'}</h3>
+          <p>${query ? 'Try a different search term' : 'Go to Add Location tab to save your first place!'}</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(loc => `
+      <div class="location-card" id="card-${loc.id}">
+        ${loc.photo
+          ? `<img class="loc-photo" src="${loc.photo}" alt="${loc.name}">`
+          : `<div class="loc-no-photo">📍</div>`}
+        <div class="loc-body">
+          <div class="loc-name">
+            <span class="loc-name-text">${loc.name}</span>
+            <span class="date-badge">${loc.date}</span>
+          </div>
+          ${loc.note ? `<div class="loc-note">${loc.note}</div>` : ''}
+          <div class="loc-coords">📌 ${loc.lat}, ${loc.lng}</div>
+          <div class="loc-actions">
+            <button class="action-btn btn-maps" onclick="openMaps('${loc.lat}','${loc.lng}')">
+              <span class="btn-icon">🗺️</span>Google Maps
+            </button>
+            <button class="action-btn btn-wa" onclick="shareWhatsApp('${loc.name}','${loc.lat}','${loc.lng}','${(loc.note||'').replace(/'/g,"\\'")}')">
+              <span class="btn-icon">💬</span>WhatsApp
+            </button>
+            <button class="action-btn btn-delete" onclick="deleteLocation(${loc.id})">
+              <span class="btn-icon">🗑️</span>Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openMaps(lat, lng) {
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    window.open(url, '_blank');
+  }
+
+  function shareWhatsApp(name, lat, lng, note) {
+    const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+    let msg = `📍 *${name}*`;
+    if (note) msg += `\n\n_${note}_`;
+    msg += `\n\n🗺️ *Google Maps:*\n${mapsLink}`;
+    msg += `\n\n📌 Coordinates: ${lat}, ${lng}`;
+    msg += `\n\n_Shared via LocationVault_`;
+    const encoded = encodeURIComponent(msg);
+    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+  }
+
+  function deleteLocation(id) {
+    locations = locations.filter(l => l.id !== id);
+    localStorage.setItem('locationvault', JSON.stringify(locations));
+    updateCount();
+    renderSaved();
+    showToast('🗑️ Location deleted');
+  }
+
+  function updateCount() {
+    document.getElementById('locCount').textContent = locations.length;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Init
+  updateCount();
+</script>
+</body>
+</html>

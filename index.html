@@ -283,10 +283,12 @@
   <div class="card">
     <div class="wa-badge">💬 WhatsApp Location Import</div>
     <div class="tip-box">
-      <b>How to save a WhatsApp location:</b><br>
-      1️⃣ Long press the location message → tap <b>Copy</b><br>
-      2️⃣ Paste below and tap <b>Extract</b><br><br>
-      <b>Or:</b> Open location → Open in Maps → copy browser URL → paste here
+      <b>✅ Best way — works every time:</b><br>
+      1️⃣ In WhatsApp, tap the location message<br>
+      2️⃣ Tap <b>"Open in Google Maps"</b><br>
+      3️⃣ Copy the URL from your <b>browser address bar</b><br>
+      4️⃣ Paste it here → tap Extract<br><br>
+      <b>Also try:</b> Long-press the location → tap <b>Copy</b> → paste here
     </div>
     <div class="form-group">
       <label class="form-label">Paste WhatsApp Message or Link</label>
@@ -443,13 +445,106 @@
 
 <script>
 /* ══════════ STATE ══════════ */
-let locations   = JSON.parse(localStorage.getItem('locationvault') || '[]');
+let locations   = [];
 let currentLat  = null, currentLng  = null;
 let parsedLat   = null, parsedLng   = null;
 let waParsedLat = null, waParsedLng = null;
 let photoDataMap= {photoUpload:null,pastePhotoUpload:null,waPhotoUpload:null};
 let mapInstance = null, mapEditId = null;
 let shareLocId  = null;
+
+/* ══════════ INDEXEDDB — Phone Storage ══════════
+   Stores each location as its own record.
+   No size limit — uses your phone's actual storage.
+   Photos stored separately per location (no quota issue).
+*/
+const DB_NAME    = 'LocationVaultDB';
+const DB_VERSION = 1;
+const STORE_LOCS = 'locations';
+let db = null;
+
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains(STORE_LOCS)){
+        const store = d.createObjectStore(STORE_LOCS,{keyPath:'id'});
+        store.createIndex('date','date',{unique:false});
+      }
+    };
+    req.onsuccess = e => { db=e.target.result; resolve(db); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function dbGetAll(){
+  return new Promise((resolve,reject)=>{
+    const tx    = db.transaction(STORE_LOCS,'readonly');
+    const store = tx.objectStore(STORE_LOCS);
+    const req   = store.getAll();
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function dbPut(loc){
+  return new Promise((resolve,reject)=>{
+    const tx    = db.transaction(STORE_LOCS,'readwrite');
+    const store = tx.objectStore(STORE_LOCS);
+    const req   = store.put(loc);
+    req.onsuccess = ()=>resolve();
+    req.onerror   = e=>reject(e.target.error);
+  });
+}
+
+function dbDelete(id){
+  return new Promise((resolve,reject)=>{
+    const tx    = db.transaction(STORE_LOCS,'readwrite');
+    const store = tx.objectStore(STORE_LOCS);
+    const req   = store.delete(id);
+    req.onsuccess = ()=>resolve();
+    req.onerror   = e=>reject(e.target.error);
+  });
+}
+
+/* Migrate any existing localStorage data into IndexedDB */
+async function migrateFromLocalStorage(){
+  try{
+    const old = localStorage.getItem('locationvault');
+    if(!old) return;
+    const arr = JSON.parse(old)||[];
+    if(!arr.length) return;
+    for(const loc of arr) await dbPut(loc);
+    localStorage.removeItem('locationvault');
+    console.log('Migrated',arr.length,'locations from localStorage to IndexedDB');
+  }catch(e){ console.warn('Migration error',e); }
+}
+
+/* Load all locations from IndexedDB into memory, sorted newest first */
+async function loadLocations(){
+  const all = await dbGetAll();
+  all.sort((a,b)=>b.id-a.id);
+  locations = all;
+  updateCount();
+}
+
+/* App init — open DB, migrate, load, render */
+async function initApp(){
+  try{
+    await openDB();
+    await migrateFromLocalStorage();
+    await loadLocations();
+    generateAppIcon();
+    // If saved tab was active, render it
+    const savedView = document.getElementById('view-saved');
+    if(savedView.classList.contains('active')) renderSaved();
+  }catch(e){
+    console.error('DB init failed',e);
+    showToast('⚠️ Storage init failed — using memory only');
+    generateAppIcon();
+  }
+}
 
 /* ══════════ ICON GENERATOR ══════════
    Draws a beautiful PNG icon using Canvas, injects it as apple-touch-icon
@@ -681,81 +776,79 @@ function clearPhoto(wrapId){
 
 /* ══════════ COORD EXTRACTOR ══════════ */
 function extractCoords(raw){
-  if(!raw) return null;
-  // Decode URL encoding first (%2C = comma, %20 = space, etc.)
-  let s = raw;
-  try { s = decodeURIComponent(raw); } catch(e){}
+  if(!raw||typeof raw!=='string') return null;
+  // Try both original and decoded variants
+  const variants=[raw];
+  try{ const d=decodeURIComponent(raw); if(d!==raw) variants.push(d); }catch(e){}
+  variants.push(raw.replace(/%2C/gi,',').replace(/%20/gi,' ').replace(/%2B/gi,' '));
 
-  let m;
-
-  // 1. @lat,lng  (google.com/maps/@25.204,55.270 or after place name)
-  m = s.match(/@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
-  if(m) return chk(m[1],m[2]);
-
-  // 2. !3dLAT!4dLNG  (Google Maps embed / share links)
-  m = s.match(/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/);
-  if(m) return chk(m[1],m[2]);
-
-  // 3. ?q=lat,lng  or &q=lat,lng  (WhatsApp shares this format)
-  m = s.match(/[?&]q=(-?\d{1,3}\.\d+)[,+](-?\d{1,3}\.\d+)/);
-  if(m) return chk(m[1],m[2]);
-
-  // 4. ?ll=lat,lng or &ll=lat,lng
-  m = s.match(/[?&]ll=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
-  if(m) return chk(m[1],m[2]);
-
-  // 5. destination=lat,lng
-  m = s.match(/destination=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
-  if(m) return chk(m[1],m[2]);
-
-  // 6. center=lat,lng
-  m = s.match(/center=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
-  if(m) return chk(m[1],m[2]);
-
-  // 7. /place/ URL with encoded coords like /place/25.2048,55.2708
-  m = s.match(/\/place\/(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
-  if(m) return chk(m[1],m[2]);
-
-  // 8. query= or search?query= format
-  m = s.match(/[?&]query=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
-  if(m) return chk(m[1],m[2]);
-
-  // 9. WhatsApp location message plain text "lat, lng" anywhere in text
-  //    e.g. "25.2048845, 55.2707828"  or  "25.2048845,55.2707828"
-  m = s.match(/(-?\d{1,3}\.\d{4,})\s*,\s*(-?\d{1,3}\.\d{4,})/);
-  if(m) return chk(m[1],m[2]);
-
+  for(const s of variants){
+    let m;
+    // !3dLAT!4dLNG — Google Maps share/embed (most common)
+    m=s.match(/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/);
+    if(m) return chk(m[1],m[2]);
+    // @lat,lng — google.com/maps/@...
+    m=s.match(/@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+    if(m) return chk(m[1],m[2]);
+    // ?q=lat,lng or ?q=lat+lng — WhatsApp format
+    m=s.match(/[?&]q=(-?\d{1,3}\.\d+)[,+\s](-?\d{1,3}\.\d+)/);
+    if(m) return chk(m[1],m[2]);
+    // query=lat,lng
+    m=s.match(/[?&]query=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+    if(m) return chk(m[1],m[2]);
+    // ?ll=lat,lng
+    m=s.match(/[?&]ll=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+    if(m) return chk(m[1],m[2]);
+    // destination=lat,lng
+    m=s.match(/destination=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+    if(m) return chk(m[1],m[2]);
+    // center=lat,lng
+    m=s.match(/center=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+    if(m) return chk(m[1],m[2]);
+    // /place/Name/@lat,lng
+    m=s.match(/\/place\/[^@]*@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+    if(m) return chk(m[1],m[2]);
+    // /place/lat,lng
+    m=s.match(/\/place\/(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+    if(m) return chk(m[1],m[2]);
+    // plain "lat, lng" anywhere (4+ decimal places to avoid false positives)
+    m=s.match(/(-?\d{1,3}\.\d{4,})\s*,\s*(-?\d{1,3}\.\d{4,})/);
+    if(m) return chk(m[1],m[2]);
+  }
   return null;
 }
 
 function chk(a,b){
-  const lat=parseFloat(a), lng=parseFloat(b);
-  return (lat>=-90&&lat<=90&&lng>=-180&&lng<=180) ? [lat,lng] : null;
+  const lat=parseFloat(a),lng=parseFloat(b);
+  return (lat>=-90&&lat<=90&&lng>=-180&&lng<=180&&!(lat===0&&lng===0))?[lat,lng]:null;
 }
-
 function isValid(lat,lng){return lat>=-90&&lat<=90&&lng>=-180&&lng<=180;}
 
-// Try multiple CORS proxies in order
-function tryShortLink(url, onSuccess, onFail){
-  const proxies = [
-    u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
-    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-  ];
-  let idx = 0;
+/* Resolve any URL through multiple proxies, extracting coords from response */
+function tryResolveLink(url, onSuccess, onFail){
+  // First try direct extraction on the URL itself (handles full URLs with coords)
+  const direct=extractCoords(url);
+  if(direct){ onSuccess(direct[0].toFixed(6),direct[1].toFixed(6)); return; }
 
+  const proxies=[
+    u=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+    u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+    u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+  ];
+  let idx=0;
   function attempt(){
-    if(idx >= proxies.length){ onFail('network'); return; }
+    if(idx>=proxies.length){ onFail(); return; }
     fetch(proxies[idx](url))
-      .then(r => r.json())
-      .then(d => {
-        // allorigins returns {contents:...}, corsproxy returns raw text
-        const html = d.contents || d || '';
-        const text = typeof html === 'string' ? html : JSON.stringify(html);
-        const c = extractCoords(text);
-        if(c) onSuccess(c[0].toFixed(6), c[1].toFixed(6));
-        else { idx++; attempt(); }
+      .then(r=>r.text())
+      .then(text=>{
+        let content=text;
+        try{ const j=JSON.parse(text); content=j.contents||j.body||text; }catch(e){}
+        // Also check the response URL if redirected
+        const c=extractCoords(content)||extractCoords(url);
+        if(c){ onSuccess(c[0].toFixed(6),c[1].toFixed(6)); }
+        else{ idx++; attempt(); }
       })
-      .catch(() => { idx++; attempt(); });
+      .catch(()=>{ idx++; attempt(); });
   }
   attempt();
 }
@@ -767,7 +860,7 @@ function parseInput(){
   const card=document.getElementById('pasteDetailsCard');
   if(!raw){showToast('⚠️ Please paste something');return;}
 
-  // Try direct extraction first
+  // Direct extraction first
   const c=extractCoords(raw);
   if(c){
     parsedLat=c[0].toFixed(6);parsedLng=c[1].toFixed(6);
@@ -775,19 +868,22 @@ function parseInput(){
     card.style.display='block';showToast('✅ Coordinates extracted!');
     return;
   }
-
-  // Find any URL in the pasted text and try to resolve it
-  const urlMatch=raw.match(/https?:\/\/[^\s<>"]+/);
-  if(urlMatch){
+  // Try every URL found in the pasted text
+  const urls=(raw.match(/https?:\/\/[^\s<>"'\]]+/g)||[]);
+  if(urls.length){
     el.innerHTML='<span style="color:var(--amber)">⏳ Resolving link…</span>';
-    tryShortLink(urlMatch[0],
-      (la,ln)=>{
-        parsedLat=la;parsedLng=ln;
-        el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;
-        card.style.display='block';showToast('✅ Coordinates extracted!');
-      },
-      ()=>el.innerHTML='<span style="color:var(--red)">❌ Could not extract. Try copying the full Google Maps URL from your browser address bar.</span>'
-    );
+    let tried=0;
+    function tryNext(){
+      if(tried>=urls.length){
+        el.innerHTML='<span style="color:var(--red)">❌ Could not extract. Open the link in your browser, copy the full URL from the address bar, and paste that here.</span>';
+        return;
+      }
+      tryResolveLink(urls[tried],
+        (la,ln)=>{parsedLat=la;parsedLng=ln;el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;card.style.display='block';showToast('✅ Coordinates extracted!');},
+        ()=>{tried++;tryNext();}
+      );
+    }
+    tryNext();
   } else {
     el.innerHTML='<span style="color:var(--red)">❌ No coordinates or link found. Paste a Google Maps URL or coordinates like: 25.2048, 55.2708</span>';
     card.style.display='none';
@@ -796,7 +892,9 @@ function parseInput(){
 function savePastedLocation(){
   const name=document.getElementById('pasteName').value.trim();
   if(!name){showToast('⚠️ Please enter a place name');return;}
-  if(!parsedLat||!parsedLng){showToast('⚠️ Extract coordinates first');return;}
+  if(parsedLat===null||parsedLat===undefined||parsedLng===null||parsedLng===undefined){
+    showToast('⚠️ Extract coordinates first');return;
+  }
   doSave({name,note:document.getElementById('pasteNote').value.trim(),lat:parsedLat,lng:parsedLng,photo:photoDataMap.pastePhotoUpload});
   document.getElementById('pasteInput').value='';document.getElementById('pasteName').value='';
   document.getElementById('pasteNote').value='';document.getElementById('parseResult').innerHTML='';
@@ -811,7 +909,7 @@ function parseWA(){
   const card=document.getElementById('waDetailsCard');
   if(!raw){showToast('⚠️ Please paste the WhatsApp message');return;}
 
-  // Try direct extraction first (handles plain coords + most Google Maps URLs)
+  // Direct extraction — handles full URLs with coords embedded
   const c=extractCoords(raw);
   if(c){
     waParsedLat=c[0].toFixed(6);waParsedLng=c[1].toFixed(6);
@@ -820,42 +918,76 @@ function parseWA(){
     return;
   }
 
-  // Find any URL in the pasted text and resolve it
-  const urlMatch=raw.match(/https?:\/\/[^\s<>"]+/);
-  if(urlMatch){
+  // Try every URL in the pasted text (short links like goo.gl need resolving)
+  const urls=(raw.match(/https?:\/\/[^\s<>"'\]]+/g)||[]);
+  if(urls.length){
     el.innerHTML='<span style="color:var(--amber)">⏳ Resolving link…</span>';
-    tryShortLink(urlMatch[0],
-      (la,ln)=>{
-        waParsedLat=la;waParsedLng=ln;
-        el.innerHTML=`<span style="color:var(--green)">✅ Location found: ${la}, ${ln}</span>`;
-        card.style.display='block';showToast('✅ Extracted!');
-      },
-      ()=>el.innerHTML='<span style="color:var(--red)">❌ Could not extract. In WhatsApp: tap the location → Open in Maps → copy the URL from browser → paste here.</span>'
-    );
+    let tried=0;
+    function tryNext(){
+      if(tried>=urls.length){
+        el.innerHTML=`<span style="color:var(--red)">❌ Short link could not be resolved automatically.<br><br>
+<b>Easy fix:</b><br>
+1️⃣ In WhatsApp tap the location<br>
+2️⃣ Tap <b>"Open in Google Maps"</b><br>
+3️⃣ Copy the URL from your browser address bar<br>
+4️⃣ Paste that URL here — it will work instantly!</span>`;
+        return;
+      }
+      tryResolveLink(urls[tried],
+        (la,ln)=>{waParsedLat=la;waParsedLng=ln;el.innerHTML=`<span style="color:var(--green)">✅ Location found: ${la}, ${ln}</span>`;card.style.display='block';showToast('✅ Extracted!');},
+        ()=>{tried++;tryNext();}
+      );
+    }
+    tryNext();
   } else {
-    el.innerHTML='<span style="color:var(--red)">❌ No location found. Make sure you copied the full WhatsApp message with the link.</span>';
+    el.innerHTML='<span style="color:var(--red)">❌ No link found. Copy the full WhatsApp location message including the link.</span>';
     card.style.display='none';
   }
 }
 function saveWALocation(){
   const name=document.getElementById('waName').value.trim();
   if(!name){showToast('⚠️ Please enter a place name');return;}
-  if(!waParsedLat||!waParsedLng){showToast('⚠️ Extract location first');return;}
-  doSave({name,note:document.getElementById('waNote').value.trim(),lat:waParsedLat,lng:waParsedLng,photo:photoDataMap.waPhotoUpload});
-  document.getElementById('waInput').value='';document.getElementById('waName').value='';
-  document.getElementById('waNote').value='';document.getElementById('waResult').innerHTML='';
+  if(waParsedLat===null||waParsedLat===undefined||waParsedLng===null||waParsedLng===undefined){
+    showToast('⚠️ Please extract the location first');return;
+  }
+  doSave({
+    name,
+    note:document.getElementById('waNote').value.trim(),
+    lat:waParsedLat,
+    lng:waParsedLng,
+    photo:photoDataMap.waPhotoUpload
+  });
+  // Reset form
+  document.getElementById('waInput').value='';
+  document.getElementById('waName').value='';
+  document.getElementById('waNote').value='';
+  document.getElementById('waResult').innerHTML='';
   document.getElementById('waDetailsCard').style.display='none';
-  waParsedLat=null;waParsedLng=null;clearPhoto('waPhotoUpload');
+  waParsedLat=null;waParsedLng=null;
+  clearPhoto('waPhotoUpload');
 }
 
 /* ══════════ CORE SAVE ══════════ */
-function doSave({name,note,lat,lng,photo}){
-  const loc={id:Date.now(),name:name.toUpperCase(),note:note||'',lat,lng,photo:photo||null,
-    date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})};
-  locations.unshift(loc);
-  localStorage.setItem('locationvault',JSON.stringify(locations));
-  updateCount();showToast('✅ Location saved!');
-  setTimeout(()=>switchTab('saved'),800);
+async function doSave({name,note,lat,lng,photo}){
+  const loc={
+    id: Date.now(),
+    name: name.toUpperCase(),
+    note: note||'',
+    lat:  String(lat),
+    lng:  String(lng),
+    photo: photo||null,
+    date: new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+  };
+  try{
+    await dbPut(loc);
+    locations.unshift(loc);
+    updateCount();
+    showToast('✅ Location saved!');
+    setTimeout(()=>switchTab('saved'),800);
+  }catch(e){
+    console.error('Save error',e);
+    showToast('❌ Could not save: '+e.message);
+  }
 }
 
 /* ══════════ SAVED LIST ══════════ */
@@ -891,10 +1023,14 @@ function renderSaved(){
 
 /* ══════════ MAPS / DELETE ══════════ */
 function openMaps(lat,lng){window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');}
-function deleteLocation(id){
-  locations=locations.filter(l=>l.id!==id);
-  localStorage.setItem('locationvault',JSON.stringify(locations));
-  updateCount();renderSaved();showToast('🗑️ Location deleted');
+async function deleteLocation(id){
+  try{
+    await dbDelete(id);
+    locations=locations.filter(l=>l.id!==id);
+    updateCount();renderSaved();showToast('🗑️ Location deleted');
+  }catch(e){
+    showToast('❌ Could not delete');
+  }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1169,13 +1305,19 @@ function openMapEditor(id){
   },60);
 }
 function closeMap(){document.getElementById('mapModal').classList.remove('open');document.body.style.overflow='';mapEditId=null;}
-function saveAdjustedPin(){
+async function saveAdjustedPin(){
   if(!mapInstance||!mapEditId)return;
   const c=mapInstance.getCenter();
   const newLat=c.lat.toFixed(6),newLng=c.lng.toFixed(6);
-  locations=locations.map(l=>l.id===mapEditId?{...l,lat:newLat,lng:newLng}:l);
-  localStorage.setItem('locationvault',JSON.stringify(locations));
-  closeMap();renderSaved();showToast('✅ Pin position updated!');
+  const updated=locations.map(l=>l.id===mapEditId?{...l,lat:newLat,lng:newLng}:l);
+  const loc=updated.find(l=>l.id===mapEditId);
+  try{
+    await dbPut(loc);
+    locations=updated;
+    closeMap();renderSaved();showToast('✅ Pin position updated!');
+  }catch(e){
+    showToast('❌ Could not update pin');
+  }
 }
 
 /* ══════════ UTILS ══════════ */
@@ -1306,7 +1448,7 @@ function resetEditGps(){
   document.getElementById('editGpsText').textContent='Use My Current Location';
 }
 
-function saveEdit(){
+async function saveEdit(){
   const name = document.getElementById('editName').value.trim();
   if(!name){ showToast('⚠️ Place name cannot be empty'); return; }
   const latVal = document.getElementById('editLat').value.trim();
@@ -1315,26 +1457,23 @@ function saveEdit(){
   if(isNaN(lat)||isNaN(lng)||lat<-90||lat>90||lng<-180||lng>180){
     showToast('⚠️ Please enter valid coordinates'); return;
   }
-
-  locations = locations.map(l => {
+  const updated = locations.map(l => {
     if(l.id !== editId) return l;
-    // Determine final photo
-    let photo = l.photo; // default: keep existing
-    if(editPhotoData === '') photo = null;      // removed
-    else if(editPhotoData) photo = editPhotoData; // new photo
-    return {
-      ...l,
-      name: name.toUpperCase(),
-      note: document.getElementById('editNote').value.trim(),
-      lat:  lat.toFixed(6),
-      lng:  lng.toFixed(6),
-      photo
-    };
+    let photo = l.photo;
+    if(editPhotoData === '') photo = null;
+    else if(editPhotoData) photo = editPhotoData;
+    return {...l, name:name.toUpperCase(), note:document.getElementById('editNote').value.trim(), lat:lat.toFixed(6), lng:lng.toFixed(6), photo};
   });
-  localStorage.setItem('locationvault', JSON.stringify(locations));
-  closeEditModal();
-  renderSaved();
-  showToast('✅ Location updated!');
+  const loc = updated.find(l=>l.id===editId);
+  try{
+    await dbPut(loc);
+    locations = updated;
+    closeEditModal();
+    renderSaved();
+    showToast('✅ Location updated!');
+  }catch(e){
+    showToast('❌ Could not update: '+e.message);
+  }
 }
 
 function closeEditModal(){
@@ -1345,8 +1484,7 @@ function closeEditModal(){
 }
 
 /* ══════════ INIT ══════════ */
-generateAppIcon();
-updateCount();
+initApp();
 </script>
 </body>
 </html>

@@ -54,6 +54,8 @@
   .form-input:focus{border-color:var(--accent);}
   .form-input::placeholder{color:var(--muted);}
   textarea.form-input{resize:none;height:80px;}
+  .input-upper{text-transform:uppercase;}
+  .input-upper::placeholder{text-transform:none;}
 
   /* ── GPS btn ── */
   .gps-btn{width:100%;padding:14px;border:2px dashed var(--border);border-radius:12px;background:transparent;color:var(--accent);font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
@@ -213,7 +215,7 @@
     <div class="card-title">📌 Location Details</div>
     <div class="form-group">
       <label class="form-label">Place Name *</label>
-      <input type="text" class="form-input" id="placeName" placeholder="e.g. Altius Office, Home, Client Site..." maxlength="80">
+      <input type="text" class="form-input input-upper" id="placeName" placeholder="e.g. Altius Office, Home, Client Site..." maxlength="80">
     </div>
     <div class="form-group">
       <label class="form-label">Notes (optional)</label>
@@ -257,7 +259,7 @@
     <div class="card-title">📌 Location Details</div>
     <div class="form-group">
       <label class="form-label">Place Name *</label>
-      <input type="text" class="form-input" id="pasteName" placeholder="e.g. Client Office, Site..." maxlength="80">
+      <input type="text" class="form-input input-upper" id="pasteName" placeholder="e.g. Client Office, Site..." maxlength="80">
     </div>
     <div class="form-group">
       <label class="form-label">Notes (optional)</label>
@@ -299,7 +301,7 @@
     <div class="card-title">📌 Location Details</div>
     <div class="form-group">
       <label class="form-label">Place Name *</label>
-      <input type="text" class="form-input" id="waName" placeholder="e.g. Customer, Delivery Point..." maxlength="80">
+      <input type="text" class="form-input input-upper" id="waName" placeholder="e.g. Customer, Delivery Point..." maxlength="80">
     </div>
     <div class="form-group">
       <label class="form-label">Notes (optional)</label>
@@ -382,7 +384,7 @@
         <div class="card-title">📌 Place Details</div>
         <div class="form-group">
           <label class="form-label">Place Name *</label>
-          <input type="text" class="form-input" id="editName" placeholder="Place name..." maxlength="80">
+          <input type="text" class="form-input input-upper" id="editName" placeholder="Place name..." maxlength="80">
         </div>
         <div class="form-group">
           <label class="form-label">Notes</label>
@@ -679,43 +681,116 @@ function clearPhoto(wrapId){
 
 /* ══════════ COORD EXTRACTOR ══════════ */
 function extractCoords(raw){
+  if(!raw) return null;
+  // Decode URL encoding first (%2C = comma, %20 = space, etc.)
+  let s = raw;
+  try { s = decodeURIComponent(raw); } catch(e){}
+
   let m;
-  m=raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  m=raw.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  m=raw.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  m=raw.match(/destination=(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  m=raw.match(/center=(-?\d+\.\d+),(-?\d+\.\d+)/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
-  m=raw.match(/(-?\d{1,3}\.\d{4,})[,\s]+(-?\d{1,3}\.\d{4,})/);if(m)return[parseFloat(m[1]),parseFloat(m[2])];
+
+  // 1. @lat,lng  (google.com/maps/@25.204,55.270 or after place name)
+  m = s.match(/@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+  if(m) return chk(m[1],m[2]);
+
+  // 2. !3dLAT!4dLNG  (Google Maps embed / share links)
+  m = s.match(/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/);
+  if(m) return chk(m[1],m[2]);
+
+  // 3. ?q=lat,lng  or &q=lat,lng  (WhatsApp shares this format)
+  m = s.match(/[?&]q=(-?\d{1,3}\.\d+)[,+](-?\d{1,3}\.\d+)/);
+  if(m) return chk(m[1],m[2]);
+
+  // 4. ?ll=lat,lng or &ll=lat,lng
+  m = s.match(/[?&]ll=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+  if(m) return chk(m[1],m[2]);
+
+  // 5. destination=lat,lng
+  m = s.match(/destination=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+  if(m) return chk(m[1],m[2]);
+
+  // 6. center=lat,lng
+  m = s.match(/center=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+  if(m) return chk(m[1],m[2]);
+
+  // 7. /place/ URL with encoded coords like /place/25.2048,55.2708
+  m = s.match(/\/place\/(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+  if(m) return chk(m[1],m[2]);
+
+  // 8. query= or search?query= format
+  m = s.match(/[?&]query=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+  if(m) return chk(m[1],m[2]);
+
+  // 9. WhatsApp location message plain text "lat, lng" anywhere in text
+  //    e.g. "25.2048845, 55.2707828"  or  "25.2048845,55.2707828"
+  m = s.match(/(-?\d{1,3}\.\d{4,})\s*,\s*(-?\d{1,3}\.\d{4,})/);
+  if(m) return chk(m[1],m[2]);
+
   return null;
 }
+
+function chk(a,b){
+  const lat=parseFloat(a), lng=parseFloat(b);
+  return (lat>=-90&&lat<=90&&lng>=-180&&lng<=180) ? [lat,lng] : null;
+}
+
 function isValid(lat,lng){return lat>=-90&&lat<=90&&lng>=-180&&lng<=180;}
-function tryShortLink(url,onSuccess,onFail){
-  fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
-    .then(r=>r.json()).then(d=>{
-      const c=extractCoords(d.contents||'');
-      if(c&&isValid(c[0],c[1]))onSuccess(c[0].toFixed(6),c[1].toFixed(6));
-      else onFail('extract');
-    }).catch(()=>onFail('network'));
+
+// Try multiple CORS proxies in order
+function tryShortLink(url, onSuccess, onFail){
+  const proxies = [
+    u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  ];
+  let idx = 0;
+
+  function attempt(){
+    if(idx >= proxies.length){ onFail('network'); return; }
+    fetch(proxies[idx](url))
+      .then(r => r.json())
+      .then(d => {
+        // allorigins returns {contents:...}, corsproxy returns raw text
+        const html = d.contents || d || '';
+        const text = typeof html === 'string' ? html : JSON.stringify(html);
+        const c = extractCoords(text);
+        if(c) onSuccess(c[0].toFixed(6), c[1].toFixed(6));
+        else { idx++; attempt(); }
+      })
+      .catch(() => { idx++; attempt(); });
+  }
+  attempt();
 }
 
 /* ══════════ PASTE TAB ══════════ */
 function parseInput(){
   const raw=document.getElementById('pasteInput').value.trim();
-  const el=document.getElementById('parseResult');const card=document.getElementById('pasteDetailsCard');
+  const el=document.getElementById('parseResult');
+  const card=document.getElementById('pasteDetailsCard');
   if(!raw){showToast('⚠️ Please paste something');return;}
+
+  // Try direct extraction first
   const c=extractCoords(raw);
-  if(c&&isValid(c[0],c[1])){
+  if(c){
     parsedLat=c[0].toFixed(6);parsedLng=c[1].toFixed(6);
     el.innerHTML=`<span style="color:var(--green)">✅ Found: ${parsedLat}, ${parsedLng}</span>`;
     card.style.display='block';showToast('✅ Coordinates extracted!');
-  } else if(raw.includes('goo.gl')||raw.includes('maps.app')){
-    el.innerHTML='<span style="color:var(--amber)">⏳ Resolving short link…</span>';
-    tryShortLink(raw,
-      (la,ln)=>{parsedLat=la;parsedLng=ln;el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;card.style.display='block';},
-      type=>el.innerHTML=`<span style="color:var(--red)">❌ ${type==='network'?'Open in browser, copy full URL':'Could not extract. Paste the full Google Maps URL.'}</span>`
+    return;
+  }
+
+  // Find any URL in the pasted text and try to resolve it
+  const urlMatch=raw.match(/https?:\/\/[^\s<>"]+/);
+  if(urlMatch){
+    el.innerHTML='<span style="color:var(--amber)">⏳ Resolving link…</span>';
+    tryShortLink(urlMatch[0],
+      (la,ln)=>{
+        parsedLat=la;parsedLng=ln;
+        el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;
+        card.style.display='block';showToast('✅ Coordinates extracted!');
+      },
+      ()=>el.innerHTML='<span style="color:var(--red)">❌ Could not extract. Try copying the full Google Maps URL from your browser address bar.</span>'
     );
   } else {
-    el.innerHTML='<span style="color:var(--red)">❌ No coordinates found.</span>';card.style.display='none';
+    el.innerHTML='<span style="color:var(--red)">❌ No coordinates or link found. Paste a Google Maps URL or coordinates like: 25.2048, 55.2708</span>';
+    card.style.display='none';
   }
 }
 function savePastedLocation(){
@@ -732,25 +807,34 @@ function savePastedLocation(){
 /* ══════════ WA IMPORT TAB ══════════ */
 function parseWA(){
   const raw=document.getElementById('waInput').value.trim();
-  const el=document.getElementById('waResult');const card=document.getElementById('waDetailsCard');
+  const el=document.getElementById('waResult');
+  const card=document.getElementById('waDetailsCard');
   if(!raw){showToast('⚠️ Please paste the WhatsApp message');return;}
+
+  // Try direct extraction first (handles plain coords + most Google Maps URLs)
   const c=extractCoords(raw);
-  if(c&&isValid(c[0],c[1])){
+  if(c){
     waParsedLat=c[0].toFixed(6);waParsedLng=c[1].toFixed(6);
     el.innerHTML=`<span style="color:var(--green)">✅ Location found: ${waParsedLat}, ${waParsedLng}</span>`;
     card.style.display='block';showToast('✅ WhatsApp location extracted!');
+    return;
+  }
+
+  // Find any URL in the pasted text and resolve it
+  const urlMatch=raw.match(/https?:\/\/[^\s<>"]+/);
+  if(urlMatch){
+    el.innerHTML='<span style="color:var(--amber)">⏳ Resolving link…</span>';
+    tryShortLink(urlMatch[0],
+      (la,ln)=>{
+        waParsedLat=la;waParsedLng=ln;
+        el.innerHTML=`<span style="color:var(--green)">✅ Location found: ${la}, ${ln}</span>`;
+        card.style.display='block';showToast('✅ Extracted!');
+      },
+      ()=>el.innerHTML='<span style="color:var(--red)">❌ Could not extract. In WhatsApp: tap the location → Open in Maps → copy the URL from browser → paste here.</span>'
+    );
   } else {
-    const urlMatch=raw.match(/https?:\/\/[^\s]+/);
-    if(urlMatch){
-      el.innerHTML='<span style="color:var(--amber)">⏳ Resolving link…</span>';
-      tryShortLink(urlMatch[0],
-        (la,ln)=>{waParsedLat=la;waParsedLng=ln;el.innerHTML=`<span style="color:var(--green)">✅ Found: ${la}, ${ln}</span>`;card.style.display='block';showToast('✅ Extracted!');},
-        ()=>el.innerHTML='<span style="color:var(--red)">❌ Could not extract. Try copying full URL from browser.</span>'
-      );
-    } else {
-      el.innerHTML='<span style="color:var(--red)">❌ No location found. Copy the full WhatsApp message.</span>';
-      card.style.display='none';
-    }
+    el.innerHTML='<span style="color:var(--red)">❌ No location found. Make sure you copied the full WhatsApp message with the link.</span>';
+    card.style.display='none';
   }
 }
 function saveWALocation(){
@@ -766,7 +850,7 @@ function saveWALocation(){
 
 /* ══════════ CORE SAVE ══════════ */
 function doSave({name,note,lat,lng,photo}){
-  const loc={id:Date.now(),name,note:note||'',lat,lng,photo:photo||null,
+  const loc={id:Date.now(),name:name.toUpperCase(),note:note||'',lat,lng,photo:photo||null,
     date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})};
   locations.unshift(loc);
   localStorage.setItem('locationvault',JSON.stringify(locations));
@@ -1240,7 +1324,7 @@ function saveEdit(){
     else if(editPhotoData) photo = editPhotoData; // new photo
     return {
       ...l,
-      name,
+      name: name.toUpperCase(),
       note: document.getElementById('editNote').value.trim(),
       lat:  lat.toFixed(6),
       lng:  lng.toFixed(6),

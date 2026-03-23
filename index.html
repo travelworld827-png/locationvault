@@ -562,24 +562,84 @@ function switchTab(tab){
 }
 
 /* ══════════ GPS ══════════ */
+let _gpsWatcher = null;
+
 function getLocation(){
-  const btn=document.getElementById('gpsBtn');
-  const icon=document.getElementById('gpsBtnIcon');
-  const text=document.getElementById('gpsBtnText');
-  const coord=document.getElementById('gpsCoords');
-  btn.className='gps-btn loading';icon.innerHTML='<div class="spinner"></div>';text.textContent='Getting location...';
-  if(!navigator.geolocation){showToast('❌ Geolocation not supported');resetGps();return;}
-  navigator.geolocation.getCurrentPosition(
-    pos=>{
-      currentLat=pos.coords.latitude.toFixed(6);currentLng=pos.coords.longitude.toFixed(6);
-      btn.className='gps-btn got';icon.textContent='✅';text.textContent='Location Captured!';
-      coord.textContent=`${currentLat}, ${currentLng}`;showToast('✅ Location captured!');
+  const btn   = document.getElementById('gpsBtn');
+  const icon  = document.getElementById('gpsBtnIcon');
+  const text  = document.getElementById('gpsBtnText');
+  const coord = document.getElementById('gpsCoords');
+
+  // Cancel any previous watcher
+  if(_gpsWatcher!=null){ navigator.geolocation.clearWatch(_gpsWatcher); _gpsWatcher=null; }
+
+  btn.className='gps-btn loading';
+  icon.innerHTML='<div class="spinner"></div>';
+  text.textContent='Acquiring GPS signal…';
+  coord.textContent='';
+
+  if(!navigator.geolocation){ showToast('❌ Geolocation not supported'); resetGps(); return; }
+
+  let bestAccuracy = Infinity;
+  let bestPos      = null;
+  const GOOD_ENOUGH = 20; // metres — accept immediately if this accurate
+  const MAX_WAIT    = 18000; // 18 seconds max
+
+  const done = (pos) => {
+    navigator.geolocation.clearWatch(_gpsWatcher);
+    _gpsWatcher = null;
+    currentLat = pos.coords.latitude.toFixed(6);
+    currentLng = pos.coords.longitude.toFixed(6);
+    const acc  = Math.round(pos.coords.accuracy);
+    btn.className  = 'gps-btn got';
+    icon.textContent = '✅';
+    text.textContent = 'Location Captured!';
+    coord.innerHTML  = `<b>${currentLat}, ${currentLng}</b><br>± ${acc}m accuracy${acc>50?' — consider retapping for better fix':''}`;
+    showToast(`✅ Captured! ±${acc}m`);
+  };
+
+  const fail = (err) => {
+    navigator.geolocation.clearWatch(_gpsWatcher);
+    _gpsWatcher = null;
+    // If we already got some position, use it
+    if(bestPos){ done(bestPos); return; }
+    resetGps();
+    coord.textContent='';
+    if(err.code===1) showToast('❌ Location permission denied');
+    else if(err.code===2) showToast('❌ Location unavailable — check GPS');
+    else showToast('❌ Location timeout — try again outdoors');
+  };
+
+  _gpsWatcher = navigator.geolocation.watchPosition(
+    (pos) => {
+      const acc = pos.coords.accuracy;
+      // Show live updating accuracy
+      text.textContent = `Refining… ±${Math.round(acc)}m`;
+
+      if(acc < bestAccuracy){
+        bestAccuracy = acc;
+        bestPos      = pos;
+      }
+      // Accept immediately if accurate enough
+      if(acc <= GOOD_ENOUGH){ done(pos); }
     },
-    err=>{resetGps();coord.textContent='';showToast(err.code===1?'❌ Permission denied':'❌ Could not get location');},
-    {enableHighAccuracy:true,timeout:15000}
+    fail,
+    { enableHighAccuracy:true, timeout:MAX_WAIT, maximumAge:0 }
   );
+
+  // Force accept best result after max wait time
+  setTimeout(()=>{
+    if(_gpsWatcher != null){
+      navigator.geolocation.clearWatch(_gpsWatcher);
+      _gpsWatcher = null;
+      if(bestPos) done(bestPos);
+      else fail({code:3});
+    }
+  }, MAX_WAIT);
 }
+
 function resetGps(){
+  if(_gpsWatcher!=null){ navigator.geolocation.clearWatch(_gpsWatcher); _gpsWatcher=null; }
   document.getElementById('gpsBtn').className='gps-btn';
   document.getElementById('gpsBtnIcon').textContent='📡';
   document.getElementById('gpsBtnText').textContent='Tap to Get Current Location';
@@ -1098,32 +1158,65 @@ function editRemovePhoto(){
   showToast('🗑️ Photo removed');
 }
 
+let _editGpsWatcher = null;
+
 function editReGPS(){
   const btn  = document.getElementById('editGpsBtn');
   const icon = document.getElementById('editGpsIcon');
   const text = document.getElementById('editGpsText');
   const res  = document.getElementById('editGpsResult');
-  btn.className = 'edit-regps-btn loading';
-  icon.innerHTML = '<div class="spinner"></div>';
-  text.textContent = 'Getting location...';
+
+  if(_editGpsWatcher!=null){ navigator.geolocation.clearWatch(_editGpsWatcher); _editGpsWatcher=null; }
+
+  btn.className='edit-regps-btn loading';
+  icon.innerHTML='<div class="spinner"></div>';
+  text.textContent='Acquiring GPS…';
+  res.textContent='';
+
   if(!navigator.geolocation){ showToast('❌ Geolocation not supported'); resetEditGps(); return; }
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const la = pos.coords.latitude.toFixed(6);
-      const ln = pos.coords.longitude.toFixed(6);
-      document.getElementById('editLat').value = la;
-      document.getElementById('editLng').value = ln;
-      btn.className = 'edit-regps-btn got';
-      icon.textContent = '✅';
-      text.textContent = 'Location Updated!';
-      res.innerHTML = `<span style="color:var(--green)">✅ ${la}, ${ln}</span>`;
-      showToast('✅ Coordinates updated!');
+
+  let bestAccuracy=Infinity, bestPos=null;
+  const GOOD_ENOUGH=20, MAX_WAIT=18000;
+
+  const done=(pos)=>{
+    navigator.geolocation.clearWatch(_editGpsWatcher); _editGpsWatcher=null;
+    const la=pos.coords.latitude.toFixed(6);
+    const ln=pos.coords.longitude.toFixed(6);
+    const acc=Math.round(pos.coords.accuracy);
+    document.getElementById('editLat').value=la;
+    document.getElementById('editLng').value=ln;
+    btn.className='edit-regps-btn got';
+    icon.textContent='✅'; text.textContent='Location Updated!';
+    res.innerHTML=`<span style="color:var(--green)">✅ ${la}, ${ln} &nbsp;±${acc}m</span>`;
+    showToast(`✅ Coordinates updated! ±${acc}m`);
+  };
+  const fail=(err)=>{
+    navigator.geolocation.clearWatch(_editGpsWatcher); _editGpsWatcher=null;
+    if(bestPos){ done(bestPos); return; }
+    resetEditGps();
+    showToast(err.code===1?'❌ Permission denied':'❌ Could not get location');
+  };
+
+  _editGpsWatcher=navigator.geolocation.watchPosition(
+    (pos)=>{
+      const acc=pos.coords.accuracy;
+      text.textContent=`Refining… ±${Math.round(acc)}m`;
+      if(acc<bestAccuracy){ bestAccuracy=acc; bestPos=pos; }
+      if(acc<=GOOD_ENOUGH) done(pos);
     },
-    err => { resetEditGps(); showToast(err.code===1?'❌ Permission denied':'❌ Could not get location'); },
-    {enableHighAccuracy:true, timeout:15000}
+    fail,
+    {enableHighAccuracy:true, timeout:MAX_WAIT, maximumAge:0}
   );
+  setTimeout(()=>{
+    if(_editGpsWatcher!=null){
+      navigator.geolocation.clearWatch(_editGpsWatcher); _editGpsWatcher=null;
+      if(bestPos) done(bestPos); else fail({code:3});
+    }
+  }, MAX_WAIT);
 }
+
 function resetEditGps(){
+  if(_editGpsWatcher!=null){ navigator.geolocation.clearWatch(_editGpsWatcher); _editGpsWatcher=null; }
   document.getElementById('editGpsBtn').className='edit-regps-btn';
   document.getElementById('editGpsIcon').textContent='📡';
   document.getElementById('editGpsText').textContent='Use My Current Location';
